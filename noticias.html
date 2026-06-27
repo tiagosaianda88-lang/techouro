@@ -152,6 +152,29 @@
       views[index].classList.add('active');
     }
   </script>
+<script>
+const NEWSAPI_KEY='723a7b6d49c6426a91c9c3c6aaa075a20';
+async function loadNews(){
+  try{
+    const res=await fetch(`https://newsapi.org/v2/everything?q=news&sortBy=publishedAt&language=en&pageSize=2&apiKey=${NEWSAPI_KEY}`);
+    const data=await res.json();
+    if(data.articles){
+      const main=document.querySelector('main');
+      if(main){
+        const cards=main.querySelectorAll('.news-card');
+        data.articles.slice(0,2).forEach((art,i)=>{
+          if(cards[i]){
+            cards[i].querySelector('h2').textContent=art.title;
+            cards[i].querySelector('.sub').textContent=art.description||'';
+          }
+        });
+      }
+    }
+  }catch(e){console.log('News load error:',e);}
+}
+loadNews();
+setInterval(loadNews,3600000);
+</script>
 <!-- ══ FOOTER FIXO ══ -->
 <div style="position:fixed;bottom:0;right:0;z-index:999;padding:6px 8px;background:rgba(8,8,8,.85);backdrop-filter:blur(10px);border-left:1px solid #1e1d1a;border-top:1px solid #1e1d1a">
   <img src="Rich Gold Lion Logo with Elegant Typography.jpg" alt="Tech & Ouro" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:1px solid #7A6115;display:block">
