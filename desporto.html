@@ -120,7 +120,31 @@
     <div class="gold-line"></div>
   <footer style="border-top:1px solid #1f1f1f; padding:24px 40px; max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
     <span style="font-family:'Playfair Display',serif; color:#C9A227; font-size:1rem; font-weight:700;">Tech &amp; Ouro</span>
-<script>document.querySelectorAll('.grid .card').forEach((card,i)=>{
+<script>async function loadRSSFeeds(){
+  try{
+    const feeds=['https://feeds.rss.go.sapo.pt/desporto.xml','https://feeds.rss.go.sapo.pt/sapodesporto.xml'];
+    for(const feed of feeds){
+      const res=await fetch('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(feed));
+      const data=await res.json();
+      if(data.items){
+        const grid=document.querySelector('.grid');
+        if(grid){
+          const cards=grid.querySelectorAll('.card');
+          data.items.slice(0,6).forEach((item,i)=>{
+            if(cards[i]){
+              cards[i].querySelector('.card-title').textContent=item.title;
+              cards[i].querySelector('.card-excerpt').textContent=item.description?.replace(/<[^>]*>/g,'').substring(0,100)||item.title;
+            }
+          });
+        }
+        break;
+      }
+    }
+  }catch(e){}
+}
+loadRSSFeeds();
+setInterval(loadRSSFeeds,3600000);
+document.querySelectorAll('.grid .card').forEach((card,i)=>{
   const title=card.querySelector('.card-title');
   const excerpt=card.querySelector('.card-excerpt:not([style*="color"])');
   const excerptEn=card.querySelector('.card-excerpt[style*="color"]');
