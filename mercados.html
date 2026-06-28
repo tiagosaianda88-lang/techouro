@@ -43,6 +43,11 @@
     @media (max-width: 900px) { nav { padding: 0 20px; } .nav-links { display: none; } .page-header { padding: 40px 20px; } .grid { grid-template-columns: 1fr; margin: 24px 20px; } footer { padding: 24px 20px; flex-direction: column; gap: 16px; } .disclaimer { padding: 16px 20px; } }
     .footer-fixed{position:fixed;bottom:0;right:0;z-index:50;padding:16px 20px;display:flex;align-items:center;gap:12px;background:rgba(8,8,8,.8);backdrop-filter:blur(10px);border-right:1px solid var(--border);border-top:1px solid var(--border)}
     .footer-fixed img{height:40px;width:auto;object-fit:contain}
+    .lang-toggle{display:flex;gap:6px;margin-bottom:12px;margin-top:8px;}
+    .lang-btn{background:transparent;border:1px solid var(--gold-dim);color:var(--muted);padding:3px 8px;font-size:.65rem;cursor:pointer;transition:all .2s;border-radius:2px;}
+    .lang-btn.active{background:var(--gold);color:#000;border-color:var(--gold);font-weight:600;}
+    .card-content{display:none;}
+    .card-content.active{display:block;}
   </style>
 </head>
 <body>
@@ -116,7 +121,31 @@
   <footer style="border-top:1px solid #1f1f1f; padding:24px 40px; max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
     <span style="font-family:'Playfair Display',serif; color:#C9A227; font-size:1rem; font-weight:700;">Tech &amp; Ouro</span>
     <span style="font-size:.65rem; color:#666; text-align:center;">Não sou economista. Nada aqui é aconselhamento financeiro. Algarve 2026.</span>
-<script>const NEWSAPI_KEY='723a7b6d49c6426a91c9c3c6aaa075a20';async function loadNews(){try{const res=await fetch(`https://newsapi.org/v2/everything?q=finance+market+stock&sortBy=publishedAt&language=en&pageSize=6&apiKey=${NEWSAPI_KEY}`);const data=await res.json();if(data.articles){const grid=document.querySelector('.grid');if(grid){const cards=grid.querySelectorAll('.card');data.articles.slice(0,6).forEach((art,i)=>{if(cards[i]){cards[i].querySelector('.card-title').textContent=art.title;cards[i].querySelector('.card-excerpt').textContent=art.description||art.title;}});}}}catch(e){}}loadNews();setInterval(loadNews,3600000);</script>
+<script>document.querySelectorAll('.grid .card').forEach((card,i)=>{
+  const title=card.querySelector('.card-title');
+  const excerpt=card.querySelector('.card-excerpt:not([style*="color"])');
+  const excerptEn=card.querySelector('.card-excerpt[style*="color"]');
+  if(title && excerpt && excerptEn){
+    const toggle=document.createElement('div');
+    toggle.className='lang-toggle';
+    toggle.innerHTML='<button class="lang-btn active" onclick="toggleCardLang(this)">PT</button><button class="lang-btn" onclick="toggleCardLang(this)">EN</button>';
+    card.insertBefore(toggle, excerpt);
+    excerpt.className='card-content active';
+    excerptEn.className='card-content';
+  }
+});
+function toggleCardLang(btn){
+  const toggle=btn.parentElement;
+  const card=toggle.closest('.card');
+  const contents=card.querySelectorAll('.card-content');
+  const btns=toggle.querySelectorAll('.lang-btn');
+  const idx=Array.from(btns).indexOf(btn);
+  btns.forEach(b=>b.classList.remove('active'));
+  contents.forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  contents[idx].classList.add('active');
+}
+const NEWSAPI_KEY='723a7b6d49c6426a91c9c3c6aaa075a20';async function loadNews(){try{const res=await fetch(`https://newsapi.org/v2/everything?q=finance+market+stock&sortBy=publishedAt&language=en&pageSize=6&apiKey=${NEWSAPI_KEY}`);const data=await res.json();if(data.articles){const grid=document.querySelector('.grid');if(grid){const cards=grid.querySelectorAll('.card');data.articles.slice(0,6).forEach((art,i)=>{if(cards[i]){cards[i].querySelector('.card-title').textContent=art.title;cards[i].querySelector('.card-excerpt').textContent=art.description||art.title;}});}}}catch(e){}}loadNews();setInterval(loadNews,3600000);</script>
     <a href="mailto:tiagowater@yahoo.com" style="font-size:.65rem; color:#666; text-decoration:none; letter-spacing:.08em;">tiagowater@yahoo.com</a>
   </footer>
   <!-- ══ FOOTER FIXO ══ -->
