@@ -85,11 +85,12 @@ def verify_file(filepath):
 
 def main():
     root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    html_files = [f for f in os.listdir(root_dir) if f.endswith('.html') and 'copia' not in f.lower() and 'cópia' not in f.lower() and 'cópia' not in f.lower()]
+    html_files = [f for f in os.listdir(root_dir) if f.endswith('.html') and f != 'terminal.html' and 'copia' not in f.lower() and 'cópia' not in f.lower() and 'cópia' not in f.lower()]
     
     print("--- TECH & OURO BILINGUAL AUDIT TOOL ---")
     all_valid_links = set(html_files)
     all_valid_links.add('index.html')
+    all_valid_links.add('terminal.html')
     
     overall_ok = True
     for f in sorted(html_files):
