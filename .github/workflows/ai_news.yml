@@ -23,17 +23,19 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install feedparser google-genai
+        pip install feedparser google-genai beautifulsoup4 pypdf
         
-    - name: Run AI News Script
+    - name: Run AI News and Country Scripts
       env:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      run: python scripts/update_news.py
+      run: |
+        python scripts/update_news.py
+        python scripts/update_countries.py
         
     - name: Commit and Push Changes
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action AI"
-        git add noticias.html
+        git add noticias.html paises.html
         # Only commit if there are changes
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Automated AI News Update" && git push)
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Automated AI News and Country Updates" && git push)
