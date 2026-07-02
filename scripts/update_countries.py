@@ -13,13 +13,33 @@ COUNTRIES = {
         "name": "Brasil",
         "feed": "https://news.google.com/rss/search?q=when:24h+site:globo.com/economia+OR+site:valoreconomico.globo.com+OR+site:infomoney.com.br&hl=pt-BR&gl=BR&ceid=BR:pt-419"
     },
+    "canada": {
+        "name": "Canada",
+        "feed": "https://news.google.com/rss/search?q=when:24h+site:cbc.ca/news&hl=en-CA&gl=CA&ceid=CA:en"
+    },
+    "usa": {
+        "name": "United States",
+        "feed": "https://news.google.com/rss/search?q=when:24h+site:wsj.com+OR+site:bloomberg.com+OR+site:reuters.com&hl=en-US&gl=US&ceid=US:en"
+    },
+    "irlanda": {
+        "name": "Irlanda",
+        "feed": "https://news.google.com/rss/search?q=when:24h+site:rte.ie/news&hl=en-IE&gl=IE&ceid=IE:en"
+    },
     "portugal": {
         "name": "Portugal",
         "feed": "https://news.google.com/rss/search?q=when:24h+site:eco.sapo.pt+OR+site:jornaldenegocios.pt+OR+site:dn.pt&hl=pt-PT&gl=PT&ceid=PT:pt"
     },
+    "suica": {
+        "name": "Suíça",
+        "feed": "https://news.google.com/rss/search?q=when:24h+site:swissinfo.ch&hl=en-CH&gl=CH&ceid=CH:en"
+    },
     "uk": {
         "name": "United Kingdom",
         "feed": "https://news.google.com/rss/search?q=when:24h+site:bbc.co.uk/news/business+OR+site:reuters.com/world/uk&hl=en-GB&gl=GB&ceid=GB:en"
+    },
+    "australia": {
+        "name": "Australia",
+        "feed": "https://news.google.com/rss/search?q=when:24h+site:abc.net.au/news&hl=en-AU&gl=AU&ceid=AU:en"
     }
 }
 
@@ -152,8 +172,23 @@ def update_block_items(block_element, new_items_html):
 
 if __name__ == "__main__":
     try:
+        # Check active countries in paises.html first to save tokens and time
+        active_ids = set()
+        if os.path.exists(HTML_FILE):
+            with open(HTML_FILE, "r", encoding="utf-8") as f:
+                soup = BeautifulSoup(f.read(), "html.parser")
+            for section in soup.find_all("section", class_="country"):
+                # BeautifulSoup find only returns active elements (not commented ones)
+                active_ids.add(section.get("id"))
+                
+        print(f"Active country sections found in HTML: {active_ids}")
+        
         dashboards = {}
         for country_id, config in COUNTRIES.items():
+            if country_id not in active_ids:
+                print(f"Skipping {config['name']} (not active/commented out in HTML).")
+                continue
+                
             raw_news = fetch_country_news(config["feed"])
             if raw_news.strip():
                 dash_data = generate_country_dashboard(country_id, config["name"], raw_news)
@@ -162,6 +197,6 @@ if __name__ == "__main__":
         if dashboards:
             update_paises_html(dashboards)
         else:
-            print("No dashboards generated.")
+            print("No dashboards updated.")
     except Exception as e:
         print(f"Failed to update countries: {e}")
