@@ -8,6 +8,8 @@ from google import genai
 RSS_FEEDS = [
     "https://feeds.a.dj.com/rss/RSSMarketsMain.xml", # WSJ Markets
     "https://feeds.a.dj.com/rss/RSSWorldNews.xml", # WSJ World News
+    "https://news.google.com/rss/search?q=when:24h+source:marketwatch&hl=en-US&gl=US&ceid=US:en", # MarketWatch
+    "https://news.google.com/rss/search?q=when:24h+source:barrons&hl=en-US&gl=US&ceid=US:en", # Barron's
     "https://news.google.com/rss/search?q=when:24h+source:reuters&hl=en-US&gl=US&ceid=US:en", # Reuters Global
     "https://news.google.com/rss/search?q=when:24h+source:bloomberg&hl=en-US&gl=US&ceid=US:en", # Bloomberg Markets
     "https://news.google.com/rss/search?q=when:24h+source:financial+times&hl=en-US&gl=US&ceid=US:en" # Financial Times
