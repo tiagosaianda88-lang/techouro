@@ -32,26 +32,47 @@ def get_existing_links():
         print(f"Error reading cache: {e}")
         return set()
 
+def extract_text_from_pdf(pdf_path, max_pages=5):
+    print(f"Extracting text from PDF: {pdf_path} (max {max_pages} pages)...")
+    try:
+        import pypdf
+        reader = pypdf.PdfReader(pdf_path)
+        num_pages = min(len(reader.pages), max_pages)
+        text = []
+        for i in range(num_pages):
+            page_text = reader.pages[i].extract_text()
+            if page_text:
+                text.append(f"--- Page {i+1} ---\n{page_text}")
+        return "\n".join(text)
+    except Exception as e:
+        print(f"Error reading PDF {pdf_path}: {e}")
+        return ""
+
 def fetch_news():
-    # 1. Check for manual news drafts in the conteudos/ directory (e.g., pasted from Telegram)
-    print("Checking for manual news drafts in conteudos/...")
+    # 1. Check for manual news drafts or PDF files in the conteudos/ directory (e.g., pasted from Telegram)
+    print("Checking for manual news drafts/PDFs in conteudos/...")
     manual_articles = []
     conteudos_dir = "conteudos"
     if os.path.exists(conteudos_dir):
         for filename in sorted(os.listdir(conteudos_dir)):
-            if filename.endswith(".txt"):
-                filepath = os.path.join(conteudos_dir, filename)
+            filepath = os.path.join(conteudos_dir, filename)
+            # Support PDF files directly!
+            if filename.endswith(".pdf"):
+                pdf_text = extract_text_from_pdf(filepath, max_pages=5)
+                if pdf_text:
+                    manual_articles.append(f"Source PDF File: {filename}\nContent:\n{pdf_text}\n---")
+            elif filename.endswith(".txt"):
                 try:
                     with open(filepath, "r", encoding="utf-8") as f:
                         content = f.read().strip()
                     # Skip files that only contain template/placeholder text or are too short
                     if content and "Insere" not in content and "Insert" not in content and len(content) > 50:
-                        manual_articles.append(f"Source File: {filename}\nContent:\n{content}\n---")
+                        manual_articles.append(f"Source Text File: {filename}\nContent:\n{content}\n---")
                 except Exception as e:
                     print(f"Error reading local file {filename}: {e}")
                     
     if manual_articles:
-        print(f"Found {len(manual_articles)} manual news draft files. Using them as source.")
+        print(f"Found {len(manual_articles)} manual news/PDF files. Using them as source.")
         return "\n".join(manual_articles)
         
     # 2. Fallback to premium RSS feeds if no manual content is found
