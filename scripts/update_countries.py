@@ -27,7 +27,7 @@ COUNTRIES = {
     },
     "portugal": {
         "name": "Portugal",
-        "feed": "https://news.google.com/rss/search?q=when:24h+site:eco.sapo.pt+OR+site:jornaldenegocios.pt+OR+site:dn.pt&hl=pt-PT&gl=PT&ceid=PT:pt"
+        "feed": "https://news.google.com/rss/search?q=when:24h+site:eco.sapo.pt+OR+site:jornaldenegocios.pt+OR+site:dn.pt+OR+site:expresso.pt&hl=pt-PT&gl=PT&ceid=PT:pt"
     },
     "suica": {
         "name": "Suíça",
