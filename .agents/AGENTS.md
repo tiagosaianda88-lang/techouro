@@ -12,3 +12,8 @@
 * **Global Selector:** Navbars must include the `[ PT | EN ]` toggle and link to `script.js` at the bottom of the body.
 * **Terminal Widget:** Keep the interactive `#term` widget in `terminal.html` intact (cleanly wrapped in the site template).
 * **AI News Aggregator:** Automated via `scripts/update_news.py` and GitHub Actions using free RSS feeds.
+
+## Interaction & Output Rules (Web Chat Synchronization)
+* **Style:** Direct to the point, no fluff, no introductory or concluding sentences.
+* **Language:** Bilingual (Portuguese/English).
+* **Focus:** Target files in the `scripts` and `conteudos` folders.
