@@ -1,4 +1,25 @@
 === ouro.html (Ouro & Cripto) ===
 
-[OURO FOCUS - ANÁLISE (PT)]
-O preço do ouro continua a atingir máximos históricos. Explicamos o que está a impulsionar a procura e o que isso significa para quem poupa em euros e dólares. O ouro físico e os ETFs de ouro spot continuam a registar volumes recorde de entradas em 2026.
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Resumo: Ouro & Cripto</title>
+</head>
+<body>
+
+    <!-- SECÇÃO: OURO & CRIPTO -->
+    <div class="seccao">
+        <h2>Ouro & Cripto / Gold & Crypto</h2>
+        
+        <div class="pt">
+            <p><strong>[PT]</strong> A Binance, a maior bolsa de criptoativos do mundo, enfrenta novos bloqueios regulatórios na União Europeia, levantando novas preocupações sobre a conformidade legal e a liquidez das operações de ativos digitais no espaço europeu.</p>
+        </div>
+        
+        <div class="en">
+            <p><strong>[EN]</strong> Binance, the world's largest cryptocurrency exchange, faces fresh regulatory blocks in the European Union, raising new concerns regarding compliance and liquidity of digital asset operations within the European space.</p>
+        </div>
+    </div>
+
+</body>
+</html>

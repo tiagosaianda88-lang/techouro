@@ -118,6 +118,9 @@ def generate_ai_news(news_text, images_parts):
     
     If there are attached images/screenshots, read their text content and extract the news from them as well.
     
+    CRITICAL TRANSLATION INSTRUCTION:
+    If the source news text or screenshot is already in English or Portuguese, keep that original text as the source for that language version (refining it slightly for premium tone if needed) and focus on translating the missing language to complete the bilingual card (e.g., if input is in English, keep the English version and translate it to Portuguese, or vice-versa). Both span tags (lang="pt" and lang="en") must be perfectly filled.
+    
     For each of the selected articles, generate the following HTML snippet (make sure the category, title, description, and internal link are fully translated into both Portuguese and English using span tags with lang="pt" and lang="en" attributes):
     <div class="card">
         <div>
