@@ -39,10 +39,37 @@ function updateHeroDate() {
 }
 
 // Automatically load the user's preferred language when the page loads
+function updateDynamicDates() {
+  const dateElements = document.querySelectorAll('.dynamic-date');
+  if (dateElements.length === 0) return;
+
+  const ptMonths = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+  const enMonths = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+
+  dateElements.forEach(el => {
+    const offset = parseInt(el.getAttribute('data-offset') || '0', 10);
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() - offset);
+
+    const day = targetDate.getDate();
+    const monthIdx = targetDate.getMonth();
+    const year = targetDate.getFullYear();
+
+    const ptFormatted = `${day} ${ptMonths[monthIdx]} ${year}`;
+    const enFormatted = `${day} ${enMonths[monthIdx]} ${year}`;
+
+    el.innerHTML = `
+      <span lang="pt">${ptFormatted}</span>
+      <span lang="en">${enFormatted}</span>
+    `;
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const savedLang = localStorage.getItem('site-lang') || 'pt';
   setLanguage(savedLang);
   updateHeroDate();
+  updateDynamicDates();
 });
 
 // Toggle Mobile Menu for responsive navigation
