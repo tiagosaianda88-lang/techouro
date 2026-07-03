@@ -52,12 +52,17 @@ Automatically retrieve, select, verify, and publish news articles using RSS feed
 | Agent | Type | Work Item | Status | Conv ID |
 |-------|------|-----------|--------|---------|
 | explorer_m1 | teamwork_preview_explorer | Explore news pipeline and layout integration | completed | 310000c3-72d2-4e43-af2b-d456a44d5857 |
-| worker_m2 | teamwork_preview_worker | Implement news pipeline updates and layout integration | in-progress | a7919588-f2f4-4ce3-8ff0-99b228aa4858 |
+| worker_m2 | teamwork_preview_worker | Implement news pipeline updates and layout integration | completed | a7919588-f2f4-4ce3-8ff0-99b228aa4858 |
+| reviewer_1 | teamwork_preview_reviewer | Review updates and run pipeline tests | in-progress | b676037c-3320-4d1f-9798-a0211bf2f251 |
+| reviewer_2 | teamwork_preview_reviewer | Review updates and run pipeline tests | in-progress | ecb2be87-2e39-4d8c-85b8-9a8d3805be41 |
+| challenger_1 | teamwork_preview_challenger | Perform adversarial testing on pipeline | in-progress | 38a83e2a-92c2-40d0-a9c7-d74b77cf7db8 |
+| challenger_2 | teamwork_preview_challenger | Perform adversarial testing on pipeline | in-progress | c9f40883-eed4-48ed-bf22-7bcb684077ba |
+| auditor | teamwork_preview_auditor | Perform forensic integrity audit | in-progress | 7c45d810-018b-439c-b86d-b506f05fb2c0 |
 
 ## Succession Status
 - Succession required: no
-- Spawn count: 2 / 16
-- Pending subagents: a7919588-f2f4-4ce3-8ff0-99b228aa4858
+- Spawn count: 7 / 16
+- Pending subagents: b676037c-3320-4d1f-9798-a0211bf2f251, ecb2be87-2e39-4d8c-85b8-9a8d3805be41, 38a83e2a-92c2-40d0-a9c7-d74b77cf7db8, c9f40883-eed4-48ed-bf22-7bcb684077ba, 7c45d810-018b-439c-b86d-b506f05fb2c0
 - Predecessor: none
 - Successor: not yet spawned
 
