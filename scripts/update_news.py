@@ -56,20 +56,17 @@ class NewsItem:
 
 
 class CollectorAgent:
-    """Collects manual material first, then falls back to RSS."""
+    """Collects manual material and falls back/merges with RSS."""
 
     def __init__(self, content_dir="conteudos"):
         self.content_dir = Path(content_dir)
 
     def collect(self):
         manual, images = self._collect_manual()
-        if manual or images:
-            print(f"Collector: {len(manual)} manual sources and {len(images)} images.")
-            return manual, images
-
-        items = self._collect_rss()
-        print(f"Collector: {len(items)} RSS items.")
-        return items, []
+        rss = self._collect_rss()
+        items = manual + rss
+        print(f"Collector: {len(manual)} manual sources, {len(images)} images, and {len(rss)} RSS items.")
+        return items, images
 
     def _collect_manual(self):
         items = []
@@ -78,6 +75,8 @@ class CollectorAgent:
             return items, images
 
         for path in sorted(self.content_dir.iterdir()):
+            if path.name in {"sobre.txt", "disclaimer.txt", "index.txt", "paises.txt"}:
+                continue
             suffix = path.suffix.lower()
             if suffix == ".pdf":
                 text = self._extract_pdf(path)
@@ -101,7 +100,13 @@ class CollectorAgent:
     def _use_manual_text(text):
         if len(text) <= 50:
             return False
-        placeholders = ("insere um titulo", "insert a manual", "insere uma noticia")
+        placeholders = (
+            "insere um titulo",
+            "insert a manual",
+            "insere uma noticia",
+            "insere o corpo",
+            "insert the body",
+        )
         normalized = normalize(text)
         return not any(placeholder in normalized for placeholder in placeholders)
 
@@ -183,6 +188,7 @@ You are the bilingual editor of Tech & Ouro. Select 6 to 8 factual, important
 stories for investors and technology readers from the supplied material.
 
 Rules:
+- Prioritize manual source files (like those ending in .txt or .pdf, or image contents) over RSS feeds (like WSJ, Bloomberg, Reuters, etc.) if they are present in the source material.
 - Never invent facts, dates, sources, quotes, prices, or events.
 - Keep the source meaning. Write concise summaries of at most 2 sentences.
 - Every story must have complete Portuguese and English text.
