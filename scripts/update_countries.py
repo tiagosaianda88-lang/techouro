@@ -173,6 +173,11 @@ def update_block_items(block_element, new_items_html):
 if __name__ == "__main__":
     try:
         # Check active countries in paises.html first to save tokens and time
+        api_key = os.environ.get("GEMINI_API_KEY")
+        if not api_key:
+            print("Warning: GEMINI_API_KEY environment variable not set. Skipping countries dashboard update.")
+            exit(0)
+
         active_ids = set()
         if os.path.exists(HTML_FILE):
             with open(HTML_FILE, "r", encoding="utf-8") as f:
@@ -200,3 +205,4 @@ if __name__ == "__main__":
             print("No dashboards updated.")
     except Exception as e:
         print(f"Failed to update countries: {e}")
+

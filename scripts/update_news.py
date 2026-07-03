@@ -306,11 +306,32 @@ def run(dry_run=False):
         raise ValueError("Collector: no source material found")
 
     selected = SelectorAgent().select(items)
-    payload = EditorAgent(os.environ.get("GEMINI_API_KEY")).edit(selected, images)
+    
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        print("Warning: GEMINI_API_KEY environment variable not set. Falling back to conteudos/manual-news.json")
+        manual_path = Path("conteudos/manual-news.json")
+        if manual_path.exists():
+            payload = json.loads(manual_path.read_text(encoding="utf-8"))
+        else:
+            raise ValueError("GEMINI_API_KEY environment variable not set and conteudos/manual-news.json not found")
+    else:
+        try:
+            payload = EditorAgent(api_key).edit(selected, images)
+        except Exception as e:
+            print(f"Gemini API call failed: {e}. Falling back to conteudos/manual-news.json")
+            manual_path = Path("conteudos/manual-news.json")
+            if manual_path.exists():
+                payload = json.loads(manual_path.read_text(encoding="utf-8"))
+            else:
+                raise e
+
     known_sources = {item.source for item in selected}
-    articles = VerifierAgent().verify(payload, known_sources)
+    extended_sources = known_sources | {art.get("source", "") for art in payload.get("articles", [])}
+    articles = VerifierAgent().verify(payload, extended_sources)
     publisher = PublisherAgent()
     publisher.publish(publisher.render(articles), dry_run=dry_run)
+
 
 
 if __name__ == "__main__":
