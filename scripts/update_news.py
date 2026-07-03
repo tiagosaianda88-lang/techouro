@@ -20,6 +20,10 @@ RSS_FEEDS = [
     ("Reuters", "https://news.google.com/rss/search?q=when:24h+source:reuters&hl=en-US&gl=US&ceid=US:en"),
     ("Bloomberg", "https://news.google.com/rss/search?q=when:24h+source:bloomberg&hl=en-US&gl=US&ceid=US:en"),
     ("Financial Times", "https://news.google.com/rss/search?q=when:24h+source:financial+times&hl=en-US&gl=US&ceid=US:en"),
+    ("InfoMoney", "https://www.infomoney.com.br/feed/"),
+    ("BBC News", "http://feeds.bbci.co.uk/news/world/rss.xml"),
+    ("CoinDesk", "https://www.coindesk.com/arc/outboundfeeds/rss/?outputType=xml"),
+    ("GoldSeek", "https://news.goldseek.com/newsRSS.xml"),
 ]
 
 HTML_FILES = (Path("noticias.html"), Path("index.html"))
