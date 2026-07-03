@@ -11,35 +11,35 @@ HTML_FILE = "paises.html"
 COUNTRIES = {
     "brasil": {
         "name": "Brasil",
-        "feed": "https://news.google.com/rss/search?q=when:24h+site:globo.com/economia+OR+site:valoreconomico.globo.com+OR+site:infomoney.com.br&hl=pt-BR&gl=BR&ceid=BR:pt-419"
+        "feed": "https://news.google.com/rss/search?q=when:3d+site:globo.com/economia+OR+site:valoreconomico.globo.com+OR+site:infomoney.com.br&hl=pt-BR&gl=BR&ceid=BR:pt-419"
     },
     "canada": {
         "name": "Canada",
-        "feed": "https://news.google.com/rss/search?q=when:24h+site:cbc.ca/news&hl=en-CA&gl=CA&ceid=CA:en"
+        "feed": "https://news.google.com/rss/search?q=when:3d+site:cbc.ca/news&hl=en-CA&gl=CA&ceid=CA:en"
     },
     "usa": {
         "name": "United States",
-        "feed": "https://news.google.com/rss/search?q=when:24h+site:wsj.com+OR+site:bloomberg.com+OR+site:reuters.com&hl=en-US&gl=US&ceid=US:en"
+        "feed": "https://news.google.com/rss/search?q=when:3d+site:wsj.com+OR+site:bloomberg.com+OR+site:reuters.com&hl=en-US&gl=US&ceid=US:en"
     },
     "irlanda": {
         "name": "Irlanda",
-        "feed": "https://news.google.com/rss/search?q=when:24h+site:rte.ie/news&hl=en-IE&gl=IE&ceid=IE:en"
+        "feed": "https://news.google.com/rss/search?q=when:3d+site:rte.ie/news&hl=en-IE&gl=IE&ceid=IE:en"
     },
     "portugal": {
         "name": "Portugal",
-        "feed": "https://news.google.com/rss/search?q=when:24h+site:eco.sapo.pt+OR+site:jornaldenegocios.pt+OR+site:dn.pt+OR+site:expresso.pt&hl=pt-PT&gl=PT&ceid=PT:pt"
+        "feed": "https://news.google.com/rss/search?q=when:3d+site:eco.sapo.pt+OR+site:jornaldenegocios.pt+OR+site:dn.pt+OR+site:expresso.pt&hl=pt-PT&gl=PT&ceid=PT:pt"
     },
     "suica": {
         "name": "Suíça",
-        "feed": "https://news.google.com/rss/search?q=when:24h+site:swissinfo.ch&hl=en-CH&gl=CH&ceid=CH:en"
+        "feed": "https://news.google.com/rss/search?q=when:3d+site:swissinfo.ch&hl=en-CH&gl=CH&ceid=CH:en"
     },
     "uk": {
         "name": "United Kingdom",
-        "feed": "https://news.google.com/rss/search?q=when:24h+site:bbc.co.uk/news/business+OR+site:reuters.com/world/uk&hl=en-GB&gl=GB&ceid=GB:en"
+        "feed": "https://news.google.com/rss/search?q=when:3d+site:bbc.co.uk/news/business+OR+site:reuters.com/world/uk&hl=en-GB&gl=GB&ceid=GB:en"
     },
     "australia": {
         "name": "Australia",
-        "feed": "https://news.google.com/rss/search?q=when:24h+site:abc.net.au/news&hl=en-AU&gl=AU&ceid=AU:en"
+        "feed": "https://news.google.com/rss/search?q=when:3d+site:abc.net.au/news&hl=en-AU&gl=AU&ceid=AU:en"
     }
 }
 

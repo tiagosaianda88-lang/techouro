@@ -15,17 +15,17 @@ from google import genai
 RSS_FEEDS = [
     ("WSJ Markets", "https://feeds.a.dj.com/rss/RSSMarketsMain.xml"),
     ("WSJ World", "https://feeds.a.dj.com/rss/RSSWorldNews.xml"),
-    ("MarketWatch", "https://news.google.com/rss/search?q=when:24h+source:marketwatch&hl=en-US&gl=US&ceid=US:en"),
-    ("Barron's", "https://news.google.com/rss/search?q=when:24h+source:barrons&hl=en-US&gl=US&ceid=US:en"),
-    ("Reuters", "https://news.google.com/rss/search?q=when:24h+source:reuters&hl=en-US&gl=US&ceid=US:en"),
-    ("Bloomberg", "https://news.google.com/rss/search?q=when:24h+source:bloomberg&hl=en-US&gl=US&ceid=US:en"),
-    ("Financial Times", "https://news.google.com/rss/search?q=when:24h+source:financial+times&hl=en-US&gl=US&ceid=US:en"),
+    ("MarketWatch", "https://news.google.com/rss/search?q=when:3d+source:marketwatch&hl=en-US&gl=US&ceid=US:en"),
+    ("Barron's", "https://news.google.com/rss/search?q=when:3d+source:barrons&hl=en-US&gl=US&ceid=US:en"),
+    ("Reuters", "https://news.google.com/rss/search?q=when:3d+source:reuters&hl=en-US&gl=US&ceid=US:en"),
+    ("Bloomberg", "https://news.google.com/rss/search?q=when:3d+source:bloomberg&hl=en-US&gl=US&ceid=US:en"),
+    ("Financial Times", "https://news.google.com/rss/search?q=when:3d+source:financial+times&hl=en-US&gl=US&ceid=US:en"),
     ("InfoMoney", "https://www.infomoney.com.br/feed/"),
     ("BBC News", "http://feeds.bbci.co.uk/news/world/rss.xml"),
     ("CoinDesk", "https://www.coindesk.com/arc/outboundfeeds/rss/?outputType=xml"),
     ("GoldSeek", "https://news.goldseek.com/newsRSS.xml"),
     ("BBC Sport", "http://feeds.bbci.co.uk/sport/rss.xml"),
-    ("Google Sports", "https://news.google.com/rss/search?q=when:24h+sports+sports&hl=en-US&gl=US&ceid=US:en"),
+    ("Google Sports", "https://news.google.com/rss/search?q=when:3d+sports+sports&hl=en-US&gl=US&ceid=US:en"),
 ]
 
 HTML_FILES = (Path("noticias.html"), Path("index.html"))
