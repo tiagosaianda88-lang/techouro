@@ -108,8 +108,8 @@ nav {
 }
 
 .nav-logo-img {
-  height: 42px;
-  width: 42px;
+  height: 1.5cm;
+  width: 1.5cm;
   border-radius: 50%;
   border: 1px solid var(--gold);
   object-fit: cover;
@@ -1064,6 +1064,7 @@ footer {
 /* Persistent bottom corner floating badge */
 .footer-fixed-badge {
   position: fixed;
+  top: auto;
   bottom: 20px;
   right: 20px;
   z-index: 999;
@@ -1071,14 +1072,14 @@ footer {
   backdrop-filter: blur(8px);
   border: 1px solid var(--border);
   border-radius: 50%;
-  padding: 6px;
+  padding: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow-md);
   transition: var(--transition);
-  width: 6cm !important;
-  height: 6cm !important;
+  width: min(4cm, calc(100vw - 24px)) !important;
+  height: min(4cm, calc(100vw - 24px)) !important;
 }
 
 .footer-fixed-badge img {
@@ -1092,6 +1093,117 @@ footer {
   transform: scale(1.1);
   border-color: var(--gold);
   box-shadow: var(--shadow-gold), var(--shadow-md);
+}
+
+@media (max-width: 600px) {
+  .footer-fixed-badge {
+    right: 12px;
+    bottom: 12px;
+  }
+}
+
+.hero-rich-logo {
+  display: block;
+  width: min(680px, 86vw);
+  height: 160px;
+  margin: 0 auto 10px;
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (max-width: 600px) {
+  .hero-rich-logo {
+    width: min(430px, 92vw);
+    height: 120px;
+  }
+}
+
+/* Index gold and crypto focus band */
+.gold-focus {
+  max-width: 1200px;
+  margin: 64px auto;
+  padding: 42px 40px;
+  border-top: 1px solid var(--gold-alpha-heavy);
+  border-bottom: 1px solid var(--gold-alpha-heavy);
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.1fr);
+  gap: 48px;
+  align-items: center;
+}
+
+.gold-focus .section-label {
+  margin: 0 0 12px;
+  padding: 0;
+}
+
+.gold-focus-heading h2 {
+  margin: 0 0 14px;
+  color: var(--text-primary);
+  font-size: 2rem;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+.gold-focus-heading > p:last-child {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.gold-focus-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+
+.gold-focus-link {
+  min-height: 180px;
+  padding: 28px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  transition: var(--transition);
+}
+
+.gold-focus-link:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.gold-focus-link strong {
+  margin: 8px 0;
+  color: var(--text-primary);
+  font-size: 1.35rem;
+  letter-spacing: 0;
+}
+
+.gold-focus-kicker {
+  color: var(--gold);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+@media (max-width: 760px) {
+  .gold-focus {
+    margin: 44px auto;
+    padding: 32px 20px;
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .gold-focus-links {
+    grid-template-columns: 1fr;
+  }
+
+  .gold-focus-link {
+    min-height: 140px;
+  }
+
 }
 
 /* Custom interactive subpage features */

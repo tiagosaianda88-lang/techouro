@@ -1,5 +1,6 @@
 .DS_Store
 .netlify/
+anty-codex/
 node_modules/
 dist/
 build/
