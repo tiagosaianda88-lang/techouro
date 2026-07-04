@@ -46,6 +46,6 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action AI"
-        git add noticias.html paises.html index.html
+        git add noticias.html paises.html index.html economia.html desporto.html tech.html geopolitica.html mercados.html ouro.html conteudos/news-archive.json
         # Only commit if there are changes
         git diff --quiet && git diff --staged --quiet || (git commit -m "Automated AI News and Country Updates" && git push)

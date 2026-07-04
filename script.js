@@ -98,6 +98,7 @@ function openArticle(cardEl) {
   const titleEn = titleEnEl ? titleEnEl.innerText : titlePt;
   const descPt = descPtEl ? descPtEl.innerText : (cardEl.querySelector('.card-desc') ? cardEl.querySelector('.card-desc').innerText : '');
   const descEn = descEnEl ? descEnEl.innerText : descPt;
+  const url = cardEl.getAttribute('data-url') || '';
   const dateHtml = dateEl ? dateEl.innerHTML : 'HOJE / TODAY';
 
   let modal = document.getElementById('article-modal');
@@ -190,11 +191,113 @@ function openArticle(cardEl) {
           <span lang="en">This content is intended purely for informational and long-term analysis purposes. No part of this article should be construed as financial advice or professional recommendation.</span>
         </p>
       </div>
+
+      <div style="margin-top: 25px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(201,162,39,0.2); padding-top: 20px; flex-wrap: wrap; gap: 15px;">
+        <div style="display: flex; gap: 15px;">
+          <button id="copy-btn-pt" style="
+            background: none;
+            border: 1px solid rgba(201,162,39,0.4);
+            color: #d4af37;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+          " onmouseover="this.style.background='rgba(201,162,39,0.1)'" onmouseout="this.style.background='none'">
+            <span class="btn-icon">📋</span>
+            <span lang="pt">Copiar Resumo (PT)</span>
+            <span lang="en">Copy Summary (PT)</span>
+          </button>
+          <button id="copy-btn-en" style="
+            background: none;
+            border: 1px solid rgba(201,162,39,0.4);
+            color: #d4af37;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+          " onmouseover="this.style.background='rgba(201,162,39,0.1)'" onmouseout="this.style.background='none'">
+            <span class="btn-icon">📋</span>
+            <span lang="pt">Copiar Resumo (EN)</span>
+            <span lang="en">Copy Summary (EN)</span>
+          </button>
+        </div>
+        ${url ? `
+        <a href="${url}" target="_blank" rel="noopener noreferrer" style="
+          color: #d4af37;
+          text-decoration: underline;
+          font-weight: bold;
+          font-size: 0.95rem;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+        ">
+          <span lang="pt">Ler continuação da notícia →</span>
+          <span lang="en">Read full story →</span>
+        </a>
+        ` : ''}
+      </div>
     </div>
   `;
 
   modal.style.opacity = '1';
   modal.style.pointerEvents = 'all';
+  
+  const copyBtnPt = modal.querySelector('#copy-btn-pt');
+  const copyBtnEn = modal.querySelector('#copy-btn-en');
+  
+  if (copyBtnPt) {
+    copyBtnPt.addEventListener('click', () => {
+      const textToCopy = `${titlePt}\n\n${descPt}`;
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        const icon = copyBtnPt.querySelector('.btn-icon');
+        const textPt = copyBtnPt.querySelector('[lang="pt"]');
+        const textEn = copyBtnPt.querySelector('[lang="en"]');
+        if (icon) icon.innerText = '✓';
+        if (textPt) textPt.innerText = 'Copiado!';
+        if (textEn) textEn.innerText = 'Copied!';
+        copyBtnPt.style.borderColor = '#00ff8c';
+        copyBtnPt.style.color = '#00ff8c';
+        setTimeout(() => {
+          if (icon) icon.innerText = '📋';
+          if (textPt) textPt.innerText = 'Copiar Resumo (PT)';
+          if (textEn) textEn.innerText = 'Copy Summary (PT)';
+          copyBtnPt.style.borderColor = 'rgba(201,162,39,0.4)';
+          copyBtnPt.style.color = '#d4af37';
+        }, 2000);
+      });
+    });
+  }
+
+  if (copyBtnEn) {
+    copyBtnEn.addEventListener('click', () => {
+      const textToCopy = `${titleEn}\n\n${descEn}`;
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        const icon = copyBtnEn.querySelector('.btn-icon');
+        const textPt = copyBtnEn.querySelector('[lang="pt"]');
+        const textEn = copyBtnEn.querySelector('[lang="en"]');
+        if (icon) icon.innerText = '✓';
+        if (textPt) textPt.innerText = 'Copiado!';
+        if (textEn) textEn.innerText = 'Copied!';
+        copyBtnEn.style.borderColor = '#00ff8c';
+        copyBtnEn.style.color = '#00ff8c';
+        setTimeout(() => {
+          if (icon) icon.innerText = '📋';
+          if (textPt) textPt.innerText = 'Copiar Resumo (EN)';
+          if (textEn) textEn.innerText = 'Copy Summary (EN)';
+          copyBtnEn.style.borderColor = 'rgba(201,162,39,0.4)';
+          copyBtnEn.style.color = '#d4af37';
+        }, 2000);
+      });
+    });
+  }
   
   const activeLang = localStorage.getItem('site-lang') || 'pt';
   setLanguage(activeLang);

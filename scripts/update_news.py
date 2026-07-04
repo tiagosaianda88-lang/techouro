@@ -6,6 +6,7 @@ import re
 import tempfile
 import unicodedata
 from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import feedparser
@@ -15,12 +16,17 @@ from google import genai
 RSS_FEEDS = [
     ("Expresso", "https://news.google.com/rss/search?q=when:3d+site:expresso.pt&hl=pt-PT&gl=PT&ceid=PT:pt"),
     ("Diário de Notícias", "https://news.google.com/rss/search?q=when:3d+site:dn.pt&hl=pt-PT&gl=PT&ceid=PT:pt"),
+    ("ECO", "https://news.google.com/rss/search?q=when:3d+site:eco.sapo.pt&hl=pt-PT&gl=PT&ceid=PT:pt"),
+    ("Jornal de Negócios", "https://news.google.com/rss/search?q=when:3d+site:jornaldenegocios.pt&hl=pt-PT&gl=PT&ceid=PT:pt"),
+    ("A Bola", "https://news.google.com/rss/search?q=when:3d+site:abola.pt&hl=pt-PT&gl=PT&ceid=PT:pt"),
+    ("Record", "https://news.google.com/rss/search?q=when:3d+site:record.pt&hl=pt-PT&gl=PT&ceid=PT:pt"),
+    ("CNBC", "https://news.google.com/rss/search?q=when:3d+source:cnbc&hl=en-US&gl=US&ceid=US:en"),
+    ("Reuters", "https://news.google.com/rss/search?q=when:3d+source:reuters&hl=en-US&gl=US&ceid=US:en"),
     ("Google Wall Street", "https://news.google.com/rss/search?q=when:3d+wall+street&hl=en-US&gl=US&ceid=US:en"),
     ("MarketWatch", "https://news.google.com/rss/search?q=when:3d+source:marketwatch&hl=en-US&gl=US&ceid=US:en"),
     ("Barron's", "https://news.google.com/rss/search?q=when:3d+source:barrons&hl=en-US&gl=US&ceid=US:en"),
 ]
 
-HTML_FILES = (Path("noticias.html"), Path("index.html"))
 START_MARKER = "<!-- AI_NEWS_START -->"
 END_MARKER = "<!-- AI_NEWS_END -->"
 ALLOWED_LINKS = {
@@ -53,6 +59,36 @@ class NewsItem:
     published: str = ""
 
 
+def clean_placeholders(text):
+    placeholders = (
+        "insere um titulo",
+        "insert a manual",
+        "insere uma noticia",
+        "insere o corpo",
+        "insert the body",
+    )
+    lines = text.splitlines()
+    cleaned_lines = []
+    for line in lines:
+        normalized_line = normalize(line)
+        if any(ph in normalized_line for ph in placeholders):
+            continue
+        cleaned_lines.append(line)
+    return "\n".join(cleaned_lines).strip()
+
+
+def split_into_blocks(text):
+    blocks = re.split(r'(?i)(?:card\s*\d+|===\s*\S+\s*===)', text)
+    valid_blocks = []
+    for b in blocks:
+        b_clean = b.strip()
+        if len(b_clean) > 50:
+            valid_blocks.append(b_clean)
+    if not valid_blocks and len(text.strip()) > 50:
+        return [text.strip()]
+    return valid_blocks
+
+
 class CollectorAgent:
     """Collects manual material and falls back/merges with RSS."""
 
@@ -73,17 +109,22 @@ class CollectorAgent:
             return items, images
 
         for path in sorted(self.content_dir.iterdir()):
-            if path.name in {"sobre.txt", "disclaimer.txt", "index.txt", "paises.txt"}:
+            if path.name in {"sobre.txt", "disclaimer.txt", "index.txt", "paises.txt", "manual-news.json", "news-archive.json"}:
                 continue
             suffix = path.suffix.lower()
             if suffix == ".pdf":
                 text = self._extract_pdf(path)
                 if text:
-                    items.append(NewsItem(path.name, path.name, text[:12000], url=f"conteudos/{path.name}"))
+                    cleaned = clean_placeholders(text)
+                    blocks = split_into_blocks(cleaned)
+                    for i, block in enumerate(blocks):
+                        items.append(NewsItem(f"{path.name} (Part {i+1})", path.name, block[:12000], url=f"conteudos/{path.name}"))
             elif suffix == ".txt":
-                text = path.read_text(encoding="utf-8").strip()
-                if self._use_manual_text(text):
-                    items.append(NewsItem(path.name, path.name, text[:12000], url=f"conteudos/{path.name}"))
+                text = path.read_text(encoding="utf-8")
+                cleaned = clean_placeholders(text)
+                blocks = split_into_blocks(cleaned)
+                for i, block in enumerate(blocks):
+                    items.append(NewsItem(f"{path.name} (Part {i+1})", path.name, block[:12000], url=f"conteudos/{path.name}"))
             elif suffix in {".png", ".jpg", ".jpeg"}:
                 image = self._load_image(path)
                 if image is not None:
@@ -93,20 +134,6 @@ class CollectorAgent:
                     )
 
         return items, images
-
-    @staticmethod
-    def _use_manual_text(text):
-        if len(text) <= 50:
-            return False
-        placeholders = (
-            "insere um titulo",
-            "insert a manual",
-            "insere uma noticia",
-            "insere o corpo",
-            "insert the body",
-        )
-        normalized = normalize(text)
-        return not any(placeholder in normalized for placeholder in placeholders)
 
     @staticmethod
     def _extract_pdf(path, max_pages=5):
@@ -138,20 +165,23 @@ class CollectorAgent:
     def _collect_rss():
         items = []
         for source, feed_url in RSS_FEEDS:
-            feed = feedparser.parse(feed_url)
-            for entry in feed.entries[:8]:
-                title = clean_text(entry.get("title", ""))
-                if not title:
-                    continue
-                items.append(
-                    NewsItem(
-                        source=source,
-                        title=title,
-                        summary=clean_text(entry.get("summary", "")),
-                        url=entry.get("link", ""),
-                        published=entry.get("published", ""),
+            try:
+                feed = feedparser.parse(feed_url)
+                for entry in feed.entries[:8]:
+                    title = clean_text(entry.get("title", ""))
+                    if not title:
+                        continue
+                    items.append(
+                        NewsItem(
+                            source=source,
+                            title=title,
+                            summary=clean_text(entry.get("summary", "")),
+                            url=entry.get("link", ""),
+                            published=entry.get("published", ""),
+                        )
                     )
-                )
+            except Exception as exc:
+                print(f"Collector: error reading feed {source}: {exc}")
         return items
 
 
@@ -219,7 +249,22 @@ class VerifierAgent:
 
         verified = []
         titles = set()
-        normalized_sources = {normalize(source) for source in known_sources}
+        normalized_sources = set()
+        for s in known_sources:
+            normalized_sources.add(normalize(s))
+            base = re.sub(r"\s+\(part\s+\d+\)", "", s, flags=re.IGNORECASE)
+            normalized_sources.add(normalize(base))
+
+        for name, _ in RSS_FEEDS:
+            normalized_sources.add(normalize(name))
+
+        content_dir = Path("conteudos")
+        if content_dir.exists():
+            for path in content_dir.iterdir():
+                if path.is_file():
+                    normalized_sources.add(normalize(path.name))
+                    normalized_sources.add(normalize(path.stem))
+
         for position, article in enumerate(articles, 1):
             if not isinstance(article, dict):
                 raise ValueError(f"Verifier: article {position} is not an object")
@@ -231,7 +276,6 @@ class VerifierAgent:
             if normalize(article["source"]) not in normalized_sources:
                 raise ValueError(f"Verifier: unknown source in article {position}")
 
-            # Verify balanced parentheses and brackets (Fiscal de Parênteses)
             for text_field in ("title_pt", "title_en", "summary_pt", "summary_en"):
                 val = article[text_field]
                 if not self._has_balanced_brackets(val):
@@ -264,13 +308,43 @@ class PublisherAgent:
     def render(self, articles):
         return "\n".join(self._render_article(article) for article in articles)
 
-    def publish(self, rendered_html, dry_run=False):
+    def publish(self, archive_articles, dry_run=False):
+        sorted_articles = sorted(archive_articles, key=lambda x: x.get("date", ""), reverse=True)
+
+        pages_categories = {
+            Path("index.html"): None,  # limit to 6
+            Path("noticias.html"): None,  # all active
+            Path("economia.html"): ["economy"],
+            Path("desporto.html"): ["sports"],
+            Path("tech.html"): ["tech"],
+            Path("geopolitica.html"): ["geopolitics"],
+            Path("mercados.html"): ["markets"],
+            Path("ouro.html"): ["gold", "crypto"],
+        }
+
         updates = {}
-        for path in HTML_FILES:
+        for path, categories in pages_categories.items():
+            if not path.exists():
+                print(f"Publisher: warning, {path} does not exist. Skipping.")
+                continue
+
+            if categories is None:
+                filtered = sorted_articles
+                if path.name == "index.html":
+                    filtered = sorted_articles[:6]
+            else:
+                filtered = [a for a in sorted_articles if a.get("category") in categories]
+
+            rendered_html = self.render(filtered)
             content = path.read_text(encoding="utf-8")
-            updates[path] = replace_news_block(content, rendered_html)
+            try:
+                updates[path] = replace_news_block(content, rendered_html)
+            except ValueError as e:
+                print(f"Publisher: skipping {path} due to error: {e}")
 
         if dry_run:
+            index_filtered = sorted_articles[:6]
+            rendered_html = self.render(index_filtered)
             Path("news-preview.html").write_text(rendered_html, encoding="utf-8")
             print("Publisher: dry run written to news-preview.html; site HTML untouched.")
             return
@@ -284,14 +358,17 @@ class PublisherAgent:
         esc = {key: html.escape(value, quote=True) for key, value in article.items()}
         link = ALLOWED_LINKS[article["category"]]
         category_pt, category_en = CATEGORY_LABELS[article["category"]]
-        return f'''<div class="card" onclick="window.location.href='{link}'">
+        
+        art_date = article.get("date", "HOJE")
+        
+        return f'''<div class="card" onclick="openArticle(this)">
   <div>
     <p class="card-cat"><span lang="pt">{category_pt}</span><span lang="en">{category_en}</span></p>
     <h2 class="card-title"><span lang="pt">{esc["title_pt"]}</span><span lang="en">{esc["title_en"]}</span></h2>
     <p class="card-desc"><span lang="pt">{esc["summary_pt"]}</span><span lang="en">{esc["summary_en"]}</span></p>
   </div>
   <div class="card-meta" onclick="event.stopPropagation();">
-    <span><span lang="pt">HOJE</span><span lang="en">TODAY</span></span>
+    <span><span lang="pt">{art_date}</span><span lang="en">{art_date}</span></span>
     <span><span lang="pt">Fonte: </span><span lang="en">Source: </span><a href="{esc["url"]}" target="_blank" rel="noopener noreferrer" style="color: #d4af37; text-decoration: underline;">{esc["source"]}</a></span>
     <span><a href="{link}" style="color: inherit; text-decoration: none;"><span lang="pt">VER ANÁLISE →</span><span lang="en">VIEW ANALYSIS →</span></a></span>
   </div>
@@ -352,10 +429,48 @@ def run(dry_run=False):
                 raise e
 
     known_sources = {item.source for item in selected}
-    articles = VerifierAgent().verify(payload, known_sources)
-    publisher = PublisherAgent()
-    publisher.publish(publisher.render(articles), dry_run=dry_run)
+    new_articles = VerifierAgent().verify(payload, known_sources)
+    
+    # Archive management
+    archive_path = Path("conteudos/news-archive.json")
+    if archive_path.exists():
+        try:
+            archive = json.loads(archive_path.read_text(encoding="utf-8"))
+        except Exception:
+            archive = []
+    else:
+        archive = []
 
+    # Filter older than 30 days
+    today = datetime.now()
+    thirty_days_ago = today - timedelta(days=30)
+    filtered_archive = []
+    for art in archive:
+        art_date_str = art.get("date")
+        if not art_date_str:
+            continue
+        try:
+            art_date = datetime.strptime(art_date_str, "%Y-%m-%d")
+            if art_date >= thirty_days_ago:
+                filtered_archive.append(art)
+        except Exception:
+            pass
+
+    # Merge new articles
+    today_str = today.strftime("%Y-%m-%d")
+    for art in new_articles:
+        art["date"] = today_str
+        # Remove any existing article with duplicate title or URL from archive
+        filtered_archive = [x for x in filtered_archive if normalize(x["title_pt"]) != normalize(art["title_pt"]) and x["url"] != art["url"]]
+        filtered_archive.append(art)
+
+    # Save archive
+    if not dry_run:
+        archive_path.write_text(json.dumps(filtered_archive, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"Archive: updated and saved {len(filtered_archive)} active articles.")
+
+    publisher = PublisherAgent()
+    publisher.publish(filtered_archive, dry_run=dry_run)
 
 
 if __name__ == "__main__":
