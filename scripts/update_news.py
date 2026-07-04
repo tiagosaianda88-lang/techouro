@@ -231,6 +231,12 @@ class VerifierAgent:
             if normalize(article["source"]) not in normalized_sources:
                 raise ValueError(f"Verifier: unknown source in article {position}")
 
+            # Verify balanced parentheses and brackets (Fiscal de Parênteses)
+            for text_field in ("title_pt", "title_en", "summary_pt", "summary_en"):
+                val = article[text_field]
+                if not self._has_balanced_brackets(val):
+                    raise ValueError(f"Verifier: article {position} has unbalanced parentheses/brackets in '{text_field}'")
+
             key = normalize(article["title_pt"])
             if key in titles:
                 raise ValueError(f"Verifier: duplicate title in article {position}")
@@ -239,6 +245,19 @@ class VerifierAgent:
 
         print(f"Verifier: {len(verified)} articles approved.")
         return verified
+
+    @staticmethod
+    def _has_balanced_brackets(text):
+        pairs = {')': '(', ']': '[', '}': '{'}
+        stack = []
+        for char in text:
+            if char in pairs.values():
+                stack.append(char)
+            elif char in pairs.keys():
+                if not stack or stack[-1] != pairs[char]:
+                    return False
+                stack.pop()
+        return len(stack) == 0
 
 
 class PublisherAgent:
