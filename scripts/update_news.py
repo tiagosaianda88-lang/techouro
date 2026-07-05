@@ -227,15 +227,16 @@ stories for investors and technology readers from the supplied material.
 
 Rules:
 - Prioritize manual source files (like those ending in .txt or .pdf, or image contents) over RSS feeds (like WSJ, Bloomberg, Reuters, etc.) if they are present in the source material.
+- Do NOT rewrite, dramatize, or summarize the stories in a sensationalist, tabloid, or clickbait style. Our clients are sophisticated investors and technology professionals who value serious, dry, factual information.
+- For manual source files, copy the original Portuguese and English text exactly as written for the summary and the body. Do not alter, shorten, or paraphrase manual source content.
+- For RSS feed stories, copy the factual details, sentences, and figures directly from the source feed description/summary. Do not invent clickbait titles or sensationalist bodies. If you cannot summarize a story professionally without adding clickbait or tabloid fluff, copy the original description/summary text exactly as the article summary and body.
 - Never invent facts, dates, sources, quotes, prices, or events.
-- Keep the source meaning. Write concise summaries of at most 2 sentences.
 - Every story must have complete Portuguese and English text.
 - category must be exactly one of: {', '.join(CATEGORY_LABELS)}.
 - source must name one supplied source.
 - Return JSON only, with an object containing an `articles` array.
 - Each article must contain: category, source, url, title_pt, title_en,
   summary_pt, summary_en, body_pt, body_en.
-- Generate a detailed, high-quality, professional article body (at least 2 paragraphs, approximately 100-150 words) for each story. This body will be displayed in the premium modal viewer. It should be highly informative, professional, and explain the context, implications, and details of the news. Do not use generic boilerplate.
 - You must return the exact `url` of the selected article from the source material. Do not invent or modify the URL.
 
 Source material:
