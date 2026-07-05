@@ -230,6 +230,7 @@ Rules:
 - Do NOT rewrite, dramatize, or summarize the stories in a sensationalist, tabloid, or clickbait style. Our clients are sophisticated investors and technology professionals who value serious, dry, factual information.
 - For manual source files, copy the original Portuguese and English text exactly as written for the summary and the body. Do not alter, shorten, or paraphrase manual source content.
 - For RSS feed stories, the generated article body (body_pt and body_en) MUST be a detailed, professional, and dry analysis of at least 220 to 300 words (minimum 220 words). It should expand on the facts in the feed to explain the broader context, economic or technological implications, and background details in a serious, high-quality tone, without introducing any sensationalism or tabloid fluff.
+- If the source material is in English (such as English RSS feeds or English manual documents) and it is not possible to copy the entire article directly in English, translate the available content to Portuguese to populate the Portuguese fields (title_pt, summary_pt, body_pt), ensuring our primary Portuguese audience receives the full translated information.
 - For RSS feed stories, the summary (summary_pt and summary_en) should be a concise 2-sentence summary.
 - Never invent facts, dates, sources, quotes, prices, or events.
 - Every story must have complete Portuguese and English text.
