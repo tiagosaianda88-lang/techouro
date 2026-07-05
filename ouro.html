@@ -13,7 +13,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ouro &amp; Ativos Digitais — Tech &amp; Ouro</title>
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 
@@ -292,6 +292,41 @@
       </p>
     </div>
 
+    <!-- NEW SECTION: TOP 10 CRYPTO LIST -->
+    <div id="crypto-list-section" style="margin-bottom: 60px; padding-top: 20px;">
+      <h2 style="font-size: 1.8rem; margin-bottom: 20px; border-left: 3px solid var(--gold); padding-left: 15px;">
+        <span lang="pt">§ Top 10 Cotações Cripto</span>
+        <span lang="en">§ Top 10 Crypto Quotes</span>
+      </h2>
+      <p style="line-height: 1.8; color: var(--text-secondary); margin-bottom: 24px;">
+        <span lang="pt">Cotações em tempo real dos maiores ativos digitais por capitalização de mercado.</span>
+        <span lang="en">Real-time quotes for the largest digital assets by market capitalization.</span>
+      </p>
+      
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm); overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: var(--font-sans); font-size: 0.9rem;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--border); color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+              <th style="padding: 12px 8px;">#</th>
+              <th style="padding: 12px 8px;"><span lang="pt">Nome</span><span lang="en">Name</span></th>
+              <th style="padding: 12px 8px; text-align: right;"><span lang="pt">Preço</span><span lang="en">Price</span></th>
+              <th style="padding: 12px 8px; text-align: right;"><span lang="pt">Var. 24h</span><span lang="en">24h Change</span></th>
+              <th style="padding: 12px 8px; text-align: right;"><span lang="pt">Cap. de Mercado</span><span lang="en">Market Cap</span></th>
+            </tr>
+          </thead>
+          <tbody id="crypto-table-body">
+            <!-- Loading state -->
+            <tr>
+              <td colspan="5" style="padding: 24px; text-align: center; color: var(--muted);">
+                <span lang="pt">A carregar cotações...</span>
+                <span lang="en">Loading quotes...</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <div class="divider" style="margin: 40px 0;"></div>
 
     <!-- SECTION 3: SILVER / PRATA -->
@@ -458,6 +493,6 @@
     <img src="logo-main.png" alt="Tech & Ouro Icon">
   </a>
 
-  <script src="script.js?v=3"></script>
+  <script src="script.js?v=4"></script>
 </body>
 </html>

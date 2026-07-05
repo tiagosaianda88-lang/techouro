@@ -71,7 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
   updateHeroDate();
   updateDynamicDates();
   updateHeaderPrices();
+  updateCryptoList();
   setInterval(updateHeaderPrices, 90000);
+  setInterval(updateCryptoList, 120000);
 });
 
 // Toggle Mobile Menu for responsive navigation
@@ -349,3 +351,65 @@ function updateHeaderPrices() {
 
 // Ticker end
 // Trigger comment to run GitHub Actions news update
+
+function updateCryptoList() {
+  const tableBody = document.getElementById('crypto-table-body');
+  if (!tableBody) return;
+
+  const fallback = [
+    { name: 'Bitcoin', symbol: 'BTC', price: 107280, chg: 1.20, cap: '2.11 T' },
+    { name: 'Ethereum', symbol: 'ETH', price: 4120, chg: 0.85, cap: '494.2 B' },
+    { name: 'BNB', symbol: 'BNB', price: 685, chg: -0.45, cap: '99.8 B' },
+    { name: 'Solana', symbol: 'SOL', price: 242, chg: 3.12, cap: '112.5 B' },
+    { name: 'XRP', symbol: 'XRP', price: 1.68, chg: -1.25, cap: '96.2 B' },
+    { name: 'Cardano', symbol: 'ADA', price: 0.88, chg: 0.15, cap: '31.4 B' },
+    { name: 'Dogecoin', symbol: 'DOGE', price: 0.42, chg: 5.40, cap: '61.1 B' },
+    { name: 'Toncoin', symbol: 'TON', price: 7.20, chg: -0.30, cap: '18.1 B' },
+    { name: 'Shiba Inu', symbol: 'SHIB', price: 0.000028, chg: 2.15, cap: '16.5 B' },
+    { name: 'Avalanche', symbol: 'AVAX', price: 42.50, chg: 1.80, cap: '17.4 B' }
+  ];
+
+  function renderTable(data) {
+    let html = '';
+    data.forEach((coin, idx) => {
+      const colorCls = coin.chg >= 0 ? '#10B981' : '#EF4444';
+      const sign = coin.chg >= 0 ? '+' : '';
+      const priceFormatted = coin.price >= 1 ? coin.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : coin.price.toFixed(6);
+      
+      html += `
+        <tr style="border-bottom: 1px solid var(--border); transition: var(--transition);" onmouseover="this.style.background='rgba(255,255,255,0.01)'" onmouseout="this.style.background='none'">
+          <td style="padding: 14px 8px; color: var(--muted); font-weight: 600;">${idx + 1}</td>
+          <td style="padding: 14px 8px; font-weight: bold; color: var(--text);">
+            ${coin.name} <span style="font-size: 0.75rem; color: var(--muted); margin-left: 6px; font-weight: normal;">${coin.symbol.toUpperCase()}</span>
+          </td>
+          <td style="padding: 14px 8px; text-align: right; font-weight: 600; color: var(--text);">$${priceFormatted}</td>
+          <td style="padding: 14px 8px; text-align: right; font-weight: 600; color: ${colorCls};">${sign}${coin.chg.toFixed(2)}%</td>
+          <td style="padding: 14px 8px; text-align: right; color: var(--text-secondary);">${coin.cap}</td>
+        </tr>
+      `;
+    });
+    tableBody.innerHTML = html;
+  }
+
+  // Try fetching from CoinGecko
+  fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false')
+    .then(r => r.json())
+    .then(d => {
+      if (Array.isArray(d) && d.length > 0) {
+        const formatted = d.map(coin => ({
+          name: coin.name,
+          symbol: coin.symbol,
+          price: coin.current_price,
+          chg: coin.price_change_percentage_24h || 0,
+          cap: coin.market_cap >= 1e12 ? (coin.market_cap / 1e12).toFixed(2) + ' T' : (coin.market_cap / 1e9).toFixed(1) + ' B'
+        }));
+        renderTable(formatted);
+      } else {
+        renderTable(fallback);
+      }
+    })
+    .catch(() => {
+      renderTable(fallback);
+    });
+}
+
