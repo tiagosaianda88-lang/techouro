@@ -88,7 +88,8 @@ def clean_placeholders(text):
 
 
 def split_into_blocks(text):
-    blocks = re.split(r'(?i)(?:card\s*\d+|===\s*\S+\s*===)', text)
+    # Split on card headers only if they are on a line by themselves, or on title headers
+    blocks = re.split(r'(?im)(?:^\s*card\s*\d+\s*$|===\s*\S+\s*===)', text)
     valid_blocks = []
     for b in blocks:
         b_clean = b.strip()
