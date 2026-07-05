@@ -1,46 +1,6 @@
 [
   {
     "category": "geopolitics",
-    "source": "Barron's",
-    "url": "https://www.barrons.com",
-    "title_pt": "Irão despede-se de Khamenei em cerimónias fúnebres massivas",
-    "title_en": "Iran bids farewell to Khamenei in massive funeral ceremonies",
-    "summary_pt": "Milhares de pessoas reuniram-se em Teerão para as cerimónias fúnebres do Líder Supremo Ayatollah Ali Khamenei, marcando um período de transição política incerta no Médio Oriente.",
-    "summary_en": "Thousands gathered in Tehran for the funeral ceremonies of Supreme Leader Ayatollah Ali Khamenei, marking a period of uncertain political transition in the Middle East.",
-    "date": "2026-07-04"
-  },
-  {
-    "category": "economy",
-    "source": "Diário de Notícias",
-    "url": "https://www.dn.pt",
-    "title_pt": "Aviso vermelho de calor extremo alargado a 13 distritos de Portugal",
-    "title_en": "Extreme heat red warning extended to 13 districts of Portugal",
-    "summary_pt": "O Instituto Português do Mar e da Atmosfera emitiu um alerta máximo devido a temperaturas invulgarmente elevadas, afetando a atividade económica e o turismo local.",
-    "summary_en": "The Portuguese Institute of Sea and Atmosphere issued a maximum alert due to unusually high temperatures, impacting economic activity and local tourism.",
-    "date": "2026-07-04"
-  },
-  {
-    "category": "crypto",
-    "source": "MarketWatch",
-    "url": "https://www.marketwatch.com",
-    "title_pt": "Tesouro dos EUA regulamenta contas de investimento infantis apoiadas por Trump",
-    "title_en": "US Treasury regulates Trump-backed children investment accounts",
-    "summary_pt": "As novas diretrizes clarificam onde os fundos das denominadas 'contas Trump' podem ser alocados em criptoativos e títulos de tesouro.",
-    "summary_en": "New guidelines clarify where funds from the so-called 'Trump accounts' can be allocated in crypto assets and treasury bonds.",
-    "date": "2026-07-04"
-  },
-  {
-    "category": "sports",
-    "source": "Expresso",
-    "url": "https://expresso.pt",
-    "title_pt": "Portugal avança nos preparativos para a fase final do torneio europeu",
-    "title_en": "Portugal advances in preparations for the European tournament finals",
-    "summary_pt": "A comissão técnica nacional confirmou a convocatória final e o plano de treinos focado na coesão tática para o confronto inaugural.",
-    "summary_en": "The national coaching staff confirmed the final call-up list and training schedule focused on tactical cohesion for the opening match.",
-    "date": "2026-07-04"
-  },
-  {
-    "category": "geopolitics",
     "source": "diario de noticias.txt",
     "url": "conteudos/diario de noticias.txt",
     "title_pt": "EUA celebram 250 anos de independência sob divisão",
@@ -98,5 +58,45 @@
     "summary_pt": "A equipa portuguesa garantiu uma vitória heróica de apuramento que contagiou de orgulho todos os adeptos portugueses.",
     "summary_en": "The Portuguese team secured a heroic qualifying victory that filled all Portuguese fans with pride.",
     "date": "2026-07-04"
+  },
+  {
+    "category": "geopolitics",
+    "source": "Barron's",
+    "url": "https://www.barrons.com",
+    "title_pt": "Irão despede-se de Khamenei em cerimónias fúnebres massivas",
+    "title_en": "Iran bids farewell to Khamenei in massive funeral ceremonies",
+    "summary_pt": "Milhares de pessoas reuniram-se em Teerão para as cerimónias fúnebres do Líder Supremo Ayatollah Ali Khamenei, marcando um período de transição política incerta no Médio Oriente.",
+    "summary_en": "Thousands gathered in Tehran for the funeral ceremonies of Supreme Leader Ayatollah Ali Khamenei, marking a period of uncertain political transition in the Middle East.",
+    "date": "2026-07-05"
+  },
+  {
+    "category": "economy",
+    "source": "Diário de Notícias",
+    "url": "https://www.dn.pt",
+    "title_pt": "Aviso vermelho de calor extremo alargado a 13 distritos de Portugal",
+    "title_en": "Extreme heat red warning extended to 13 districts of Portugal",
+    "summary_pt": "O Instituto Português do Mar e da Atmosfera emitiu um alerta máximo devido a temperaturas invulgarmente elevadas, afetando a atividade económica e o turismo local.",
+    "summary_en": "The Portuguese Institute of Sea and Atmosphere issued a maximum alert due to unusually high temperatures, impacting economic activity and local tourism.",
+    "date": "2026-07-05"
+  },
+  {
+    "category": "crypto",
+    "source": "MarketWatch",
+    "url": "https://www.marketwatch.com",
+    "title_pt": "Tesouro dos EUA regulamenta contas de investimento infantis apoiadas por Trump",
+    "title_en": "US Treasury regulates Trump-backed children investment accounts",
+    "summary_pt": "As novas diretrizes clarificam onde os fundos das denominadas 'contas Trump' podem ser alocados em criptoativos e títulos de tesouro.",
+    "summary_en": "New guidelines clarify where funds from the so-called 'Trump accounts' can be allocated in crypto assets and treasury bonds.",
+    "date": "2026-07-05"
+  },
+  {
+    "category": "sports",
+    "source": "Expresso",
+    "url": "https://expresso.pt",
+    "title_pt": "Portugal avança nos preparativos para a fase final do torneio europeu",
+    "title_en": "Portugal advances in preparations for the European tournament finals",
+    "summary_pt": "A comissão técnica nacional confirmou a convocatória final e o plano de treinos focado na coesão tática para o confronto inaugural.",
+    "summary_en": "The national coaching staff confirmed the final call-up list and training schedule focused on tactical cohesion for the opening match.",
+    "date": "2026-07-05"
   }
 ]
