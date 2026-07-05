@@ -375,6 +375,11 @@ class PublisherAgent:
         category_pt, category_en = CATEGORY_LABELS[article["category"]]
         
         art_date = article.get("date", "HOJE")
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        if art_date == today_str:
+            date_html = '<span lang="pt">HOJE</span><span lang="en">TODAY</span>'
+        else:
+            date_html = f'<span lang="pt">{art_date}</span><span lang="en">{art_date}</span>'
         
         body_pt = article.get("body_pt", "")
         body_en = article.get("body_en", "")
@@ -389,7 +394,7 @@ class PublisherAgent:
     <p class="card-desc"><span lang="pt">{esc["summary_pt"]}</span><span lang="en">{esc["summary_en"]}</span></p>
   </div>
   <div class="card-meta" onclick="event.stopPropagation();">
-    <span><span lang="pt">{art_date}</span><span lang="en">{art_date}</span></span>
+    <span>{date_html}</span>
     <span><span lang="pt">Fonte: </span><span lang="en">Source: </span><a href="{esc["url"]}" target="_blank" rel="noopener noreferrer" style="color: #d4af37; text-decoration: underline;">{esc["source"]}</a></span>
     <span><a href="{link}" style="color: inherit; text-decoration: none;"><span lang="pt">VER ANÁLISE →</span><span lang="en">VIEW ANALYSIS →</span></a></span>
   </div>

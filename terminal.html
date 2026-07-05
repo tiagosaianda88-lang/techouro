@@ -536,7 +536,14 @@
    panelArticles.forEach(function(n){
      var cat = cats[n.category] || [n.category ? n.category.toUpperCase() : 'GERAL', n.category ? n.category.toUpperCase() : 'GENERAL'];
      var src = n.source || '';
-     var dateStr = n.date || 'HOJE';
+     var dateStr = n.date || '';
+     var todayStr = new Date().toISOString().slice(0, 10);
+     var dateHtml = '';
+     if (dateStr === todayStr || !dateStr) {
+       dateHtml = '<span lang="pt">HOJE</span><span lang="en">TODAY</span>';
+     } else {
+       dateHtml = esc(dateStr);
+     }
      var titlePt = n.title_pt || n.title || '';
      var titleEn = n.title_en || n.title || '';
      var summaryPt = n.summary_pt || '';
@@ -548,7 +555,7 @@
      panel.innerHTML+='<div class="nitem" onclick="openArticle(this)" style="cursor: pointer;" data-url="'+esc(url)+'" data-body-pt="'+esc(bodyPt)+'" data-body-en="'+esc(bodyEn)+'">'+
        '<div class="nsrc">'+
          '<span class="card-cat"><span lang="pt">'+cat[0]+'</span><span lang="en">'+cat[1]+'</span> · '+esc(src)+'</span>'+
-         '<span class="card-meta"><span>'+esc(dateStr)+'</span></span>'+
+         '<span class="card-meta"><span>'+dateHtml+'</span></span>'+
        '</div>'+
        '<div class="ntt card-title">'+
          '<span lang="pt">'+esc(titlePt)+'</span>'+
