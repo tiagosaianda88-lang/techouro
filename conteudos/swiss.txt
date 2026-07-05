@@ -1,0 +1,11 @@
+=== swiss.html (Switzerland) ===
+
+[TITULO ARTIGO (PT)]
+Novidades e desenvolvimentos na Suíça em 2026
+[TITULO ARTIGO (EN)]
+News and developments in Switzerland in 2026
+
+[CONTEUDO TEXTO (PT)]
+Escreve aqui as notícias sobre a Suíça...
+[CONTEUDO TEXTO (EN)]
+Write here the news about Switzerland...

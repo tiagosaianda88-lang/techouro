@@ -1,0 +1,11 @@
+=== rte.html (Ireland) ===
+
+[TITULO ARTIGO (PT)]
+Novidades e desenvolvimentos na Irlanda em 2026
+[TITULO ARTIGO (EN)]
+News and developments in Ireland in 2026
+
+[CONTEUDO TEXTO (PT)]
+Escreve aqui as notícias sobre a Irlanda...
+[CONTEUDO TEXTO (EN)]
+Write here the news about Ireland...

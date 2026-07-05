@@ -1,0 +1,11 @@
+=== cbc.html (Canada) ===
+
+[TITULO ARTIGO (PT)]
+Novidades e desenvolvimentos no Canadá em 2026
+[TITULO ARTIGO (EN)]
+News and developments in Canada in 2026
+
+[CONTEUDO TEXTO (PT)]
+Escreve aqui as notícias sobre o Canadá...
+[CONTEUDO TEXTO (EN)]
+Write here the news about Canada...
