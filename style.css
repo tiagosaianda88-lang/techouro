@@ -401,14 +401,14 @@ nav {
 
 .cards-3 {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 380px));
   gap: 16px;
   max-width: 1200px;
   margin: 0 auto 40px;
   padding: 0 40px;
+  justify-content: center;
 }
 
-/* Card Component styles */
 .card, .card-sm {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -422,6 +422,10 @@ nav {
   justify-content: space-between;
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
+  max-width: 380px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .card::before {
