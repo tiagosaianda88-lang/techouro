@@ -440,6 +440,11 @@ nav {
   transition: var(--transition);
 }
 
+.card-natgeo {
+  border: 2px solid #FFCC00 !important; /* Estilo National Geographic */
+}
+
+
 .card:hover, .card-sm:hover {
   transform: translateY(-4px);
   border-color: var(--gold-dim);

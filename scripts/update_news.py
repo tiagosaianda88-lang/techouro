@@ -48,6 +48,7 @@ ALLOWED_LINKS = {
     "sports": "desporto.html",
     "tech": "tech.html",
     "geopolitics": "geopolitica.html",
+    "countries": "paises.html",
     "general": "index.html",
 }
 CATEGORY_LABELS = {
@@ -57,6 +58,7 @@ CATEGORY_LABELS = {
     "crypto": ("CRIPTO", "CRYPTO"),
     "tech": ("TECNOLOGIA", "TECH"),
     "geopolitics": ("GEOPOLITICA", "GEOPOLITICS"),
+    "countries": ("PAÍSES", "COUNTRIES"),
     "sports": ("DESPORTO", "SPORTS"),
 }
 
@@ -229,9 +231,10 @@ stories for investors and technology readers from the supplied material.
 
 Rules:
 - Prioritize manual source files (like those ending in .txt or .pdf, or image contents) over RSS feeds (like WSJ, Bloomberg, Reuters, etc.) if they are present in the source material.
-- Generate highly engaging, catchy, tabloid-style headlines (title_pt and title_en) designed to grab attention and drive clicks (e.g., "Choque nos Mercados", "Fortuna em Risco", "O Segredo de Wall Street", "Milhões em Jogo"). The titles MUST be magnetic and irresistible, just like a British tabloid.
+- Generate highly engaging, catchy, tabloid-style headlines (title_pt and title_en) designed to grab attention and drive clicks. The titles MUST be magnetic and irresistible, just like a British tabloid.
 - However, the body of the article (body_pt and body_en) MUST remain a serious, factual, deep, and professional analysis of at least 220 to 300 words. We attract them with the tabloid title, but we retain them with high-quality, deep financial and technological information. Never invent facts.
-- For the summary (summary_pt and summary_en), write a punchy, 2-sentence hook that bridges the shocking title with the serious facts, maintaining a clean website layout. Never copy the full article text into the summary fields.
+- For the summary (summary_pt and summary_en), write a punchy, 2-sentence hook that bridges the shocking title with the serious facts.
+- IMPORTANT ROUTING RULES: American news, especially from Wall Street sources, normally goes to the 'countries' category. American football news goes to the 'sports' category. The most bombastic and explosive news stories must be prioritized.
 - Never invent facts, dates, sources, quotes, prices, or events.
 - Every story must have complete Portuguese and English text.
 - category must be exactly one of: {', '.join(CATEGORY_LABELS)}.
@@ -320,7 +323,27 @@ class VerifierAgent:
 
 class PublisherAgent:
     def render(self, articles):
-        return "\n".join(self._render_article(article) for article in articles)
+        rendered = []
+        for i, article in enumerate(articles):
+            rendered.append(self._render_article(article))
+            if (i + 1) % 3 == 0 and (i + 1) != len(articles):
+                rendered.append(self._render_adsense_infeed())
+        return "\n".join(rendered)
+
+    @staticmethod
+    def _render_adsense_infeed():
+        return '''<div class="card in-feed-ad" style="background: transparent; box-shadow: none; padding: 0; border: none;">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2757348402596933" crossorigin="anonymous"></script>
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-format="fluid"
+     data-ad-layout-key="-ec+6l-2v-aq+u1"
+     data-ad-client="ca-pub-2757348402596933"
+     data-ad-slot="8218810488"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>'''
 
     def publish(self, archive_articles, dry_run=False):
         sorted_articles = sorted(archive_articles, key=lambda x: x.get("date", ""), reverse=True)
@@ -334,6 +357,7 @@ class PublisherAgent:
             Path("geopolitica.html"): ["geopolitics"],
             Path("mercados.html"): ["markets"],
             Path("ouro.html"): ["gold", "crypto"],
+            Path("paises.html"): ["countries"],
         }
 
         updates = {}
@@ -386,7 +410,7 @@ class PublisherAgent:
         esc_body_pt = html.escape(body_pt, quote=True)
         esc_body_en = html.escape(body_en, quote=True)
         
-        return f'''<div class="card" onclick="openArticle(this)" data-body-pt="{esc_body_pt}" data-body-en="{esc_body_en}">
+        return f'''<div class="card card-natgeo" onclick="openArticle(this)" data-body-pt="{esc_body_pt}" data-body-en="{esc_body_en}">
   <div>
     <p class="card-cat"><span lang="pt">{category_pt}</span><span lang="en">{category_en}</span></p>
     <h2 class="card-title"><span lang="pt">{esc["title_pt"]}</span><span lang="en">{esc["title_en"]}</span></h2>
@@ -434,19 +458,84 @@ def atomic_write(path, content):
     os.replace(temp_path, path)
 
 
-def run(dry_run=False):
+def run(action="generate", dry_run=False):
+    draft_path = Path("conteudos/news-draft.json")
+    archive_path = Path("conteudos/news-archive.json")
+
+    if action == "publish":
+        if not draft_path.exists():
+            print("Publisher: No news-draft.json found. Run generation first.")
+            return
+
+        try:
+            new_articles = json.loads(draft_path.read_text(encoding="utf-8"))
+        except Exception as e:
+            print(f"Publisher: Failed to read draft: {e}")
+            return
+            
+        print(f"Publisher: Loaded {len(new_articles)} articles from draft.")
+
+        # Archive management
+        if archive_path.exists():
+            try:
+                archive = json.loads(archive_path.read_text(encoding="utf-8"))
+            except Exception:
+                archive = []
+        else:
+            archive = []
+
+        # Filter older than 20 days
+        today = datetime.now()
+        twenty_days_ago = today - timedelta(days=20)
+        filtered_archive = []
+        for art in archive:
+            art_date_str = art.get("date")
+            if not art_date_str:
+                continue
+            try:
+                art_date = datetime.strptime(art_date_str, "%Y-%m-%d")
+                if art_date >= twenty_days_ago:
+                    filtered_archive.append(art)
+            except Exception:
+                pass
+
+        # Merge new articles
+        today_str = today.strftime("%Y-%m-%d")
+        for art in new_articles:
+            art["date"] = today_str
+            filtered_archive = [x for x in filtered_archive if normalize(x.get("title_pt", "")) != normalize(art.get("title_pt", "")) and x.get("url") != art.get("url")]
+            filtered_archive.append(art)
+
+        # Save archive
+        if not dry_run:
+            archive_path.write_text(json.dumps(filtered_archive, indent=2, ensure_ascii=False), encoding="utf-8")
+            print(f"Archive: updated and saved {len(filtered_archive)} active articles.")
+
+        publisher = PublisherAgent()
+        publisher.publish(filtered_archive, dry_run=dry_run)
+        
+        if not dry_run:
+            # Delete draft after successful publish
+            draft_path.unlink(missing_ok=True)
+            print("Publisher: Draft published and removed.")
+        return
+
+    # Generation action
+    print("Generator: Starting news collection...")
     items, images = CollectorAgent().collect()
     if not items and not images:
         raise ValueError("Collector: no source material found")
 
     selected = SelectorAgent().select(items)
     
+    is_fallback = False
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         print("Warning: GEMINI_API_KEY environment variable not set. Falling back to conteudos/manual-news.json")
         manual_path = Path("conteudos/manual-news.json")
         if manual_path.exists():
             payload = json.loads(manual_path.read_text(encoding="utf-8"))
+            is_fallback = True
         else:
             raise ValueError("GEMINI_API_KEY environment variable not set and conteudos/manual-news.json not found")
     else:
@@ -457,56 +546,28 @@ def run(dry_run=False):
             manual_path = Path("conteudos/manual-news.json")
             if manual_path.exists():
                 payload = json.loads(manual_path.read_text(encoding="utf-8"))
+                is_fallback = True
             else:
                 raise e
 
     known_sources = {item.source for item in selected}
+    if is_fallback and isinstance(payload, dict) and isinstance(payload.get("articles"), list):
+        for art in payload["articles"]:
+            if "source" in art:
+                known_sources.add(art["source"])
+
     new_articles = VerifierAgent().verify(payload, known_sources)
     
-    # Archive management
-    archive_path = Path("conteudos/news-archive.json")
-    if archive_path.exists():
-        try:
-            archive = json.loads(archive_path.read_text(encoding="utf-8"))
-        except Exception:
-            archive = []
-    else:
-        archive = []
-
-    # Filter older than 20 days
-    today = datetime.now()
-    twenty_days_ago = today - timedelta(days=20)
-    filtered_archive = []
-    for art in archive:
-        art_date_str = art.get("date")
-        if not art_date_str:
-            continue
-        try:
-            art_date = datetime.strptime(art_date_str, "%Y-%m-%d")
-            if art_date >= twenty_days_ago:
-                filtered_archive.append(art)
-        except Exception:
-            pass
-
-    # Merge new articles
-    today_str = today.strftime("%Y-%m-%d")
-    for art in new_articles:
-        art["date"] = today_str
-        # Remove any existing article with duplicate title or URL from archive
-        filtered_archive = [x for x in filtered_archive if normalize(x["title_pt"]) != normalize(art["title_pt"]) and x["url"] != art["url"]]
-        filtered_archive.append(art)
-
-    # Save archive
-    if not dry_run:
-        archive_path.write_text(json.dumps(filtered_archive, indent=2, ensure_ascii=False), encoding="utf-8")
-        print(f"Archive: updated and saved {len(filtered_archive)} active articles.")
-
-    publisher = PublisherAgent()
-    publisher.publish(filtered_archive, dry_run=dry_run)
+    # Save to draft
+    draft_path.write_text(json.dumps(new_articles, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"Generator: Saved {len(new_articles)} articles to {draft_path} for review.")
+    print("Run with '--publish' to apply the draft to the site.")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Safe multi-agent news pipeline")
     parser.add_argument("--dry-run", action="store_true", help="do not modify site HTML")
+    parser.add_argument("--publish", action="store_true", help="Publish the reviewed draft")
     args = parser.parse_args()
-    run(dry_run=args.dry_run)
+    action = "publish" if args.publish else "generate"
+    run(action=action, dry_run=args.dry_run)
