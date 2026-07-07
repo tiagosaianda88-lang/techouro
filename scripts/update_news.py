@@ -261,8 +261,9 @@ class VerifierAgent:
 
     def verify(self, payload, known_sources):
         articles = payload.get("articles") if isinstance(payload, dict) else None
-        if not isinstance(articles, list) or len(articles) == 0:
-            raise ValueError("Verifier: expected at least 1 article")
+        if not isinstance(articles, list):
+            raise ValueError("Verifier: expected a list of articles")
+        articles = articles[:10]
 
         verified = []
         titles = set()
