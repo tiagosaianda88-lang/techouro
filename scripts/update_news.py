@@ -525,8 +525,7 @@ class PublisherAgent:
         <span class="source-attribution"><span lang="pt">Fonte: </span><span lang="en">Source: </span><a href="{esc["url"]}" target="_blank" rel="noopener noreferrer">{esc["source"]}</a></span>
         <span class="editorial-attribution"><span lang="pt">Resumo editorial Tech &amp; Ouro</span><span lang="en">Editorial summary by Tech &amp; Ouro</span></span>
       </div>
-      <div style="display: flex; gap: 8px;">
-        <a href="https://wa.me/?text=Olha%20esta%20not%C3%ADcia%3A%20{esc['url']}" target="_blank" rel="noopener noreferrer" style="background: #25D366; color: white; padding: 2px 8px; border-radius: 4px; text-decoration: none; font-weight: bold;">WhatsApp</a>
+      <div style="display: flex; gap: 8px; margin-left: auto;">
         <a href="{link}" onclick="event.preventDefault(); event.stopPropagation(); openArticle(this.closest('.card'));" style="background: var(--gold); color: black; padding: 2px 8px; border-radius: 4px; text-decoration: none; font-weight: bold;"><span lang="pt">LER TUDO</span><span lang="en">READ ALL</span></a>
       </div>
     </div>

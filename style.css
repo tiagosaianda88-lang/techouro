@@ -74,6 +74,11 @@ p {
   color: var(--text-secondary);
 }
 
+.text-block {
+  color: var(--text-secondary);
+  margin-bottom: 22px;
+}
+
 a {
   color: var(--gold);
   text-decoration: none;
@@ -397,6 +402,7 @@ nav {
   max-width: 1200px;
   margin: 0 auto 30px;
   padding: 0 40px;
+  align-items: start;
 }
 
 .cards-3 {
@@ -2200,7 +2206,7 @@ body {
 
   .card,
   .card-sm {
-    padding: 20px;
+    padding: 14px;
     background:
       linear-gradient(180deg, rgba(18, 18, 18, 0.98), rgba(8, 8, 8, 0.98)) !important;
     border-color: rgba(212, 175, 55, 0.34);
@@ -2213,33 +2219,55 @@ body {
   }
 
   .card-header-placeholder {
-    min-height: 54px;
+    min-height: 34px;
     height: auto;
-    margin: -20px -20px 16px;
+    margin: -14px -14px 10px;
+  }
+
+  .card-cat {
+    font-size: 0.62rem;
+    margin-bottom: 6px;
   }
 
   .card-title {
-    font-size: 1.14rem;
-    line-height: 1.28;
+    font-size: 1rem;
+    line-height: 1.22;
+    margin-bottom: 8px;
     letter-spacing: 0;
     overflow-wrap: anywhere;
-    -webkit-line-clamp: 4;
+    -webkit-line-clamp: 2;
   }
 
   .card-desc {
-    font-size: 0.9rem;
-    line-height: 1.45;
-    -webkit-line-clamp: 3;
+    font-size: 0.84rem;
+    line-height: 1.35;
+    margin-bottom: 10px;
+    -webkit-line-clamp: 2;
   }
 
   .card-meta {
-    gap: 8px;
-    flex-wrap: wrap;
-    align-items: flex-start;
+    gap: 6px;
+    padding-top: 9px;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .card-meta > div {
+    gap: 8px !important;
+    justify-content: flex-end !important;
+  }
+
+  .source-stack {
+    display: none;
+  }
+
+  .card-meta a {
+    padding: 5px 10px !important;
+    line-height: 1.2;
   }
 
   .cat-icon {
-    font-size: 1rem;
+    font-size: 0.78rem;
     letter-spacing: 0.08em;
     overflow-wrap: anywhere;
     text-align: center;
@@ -2282,12 +2310,14 @@ body {
   }
 
   .in-feed-ad {
-    min-height: 104px !important;
-    padding: 12px !important;
+    min-height: 76px !important;
+    max-height: 116px;
+    padding: 8px !important;
   }
 
   .in-feed-ad .adsbygoogle {
-    min-height: 80px !important;
+    min-height: 58px !important;
+    max-height: 92px;
   }
 }
 

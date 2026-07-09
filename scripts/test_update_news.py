@@ -71,6 +71,12 @@ class PublisherAgentTests(unittest.TestCase):
         self.assertIn("Resumo editorial Tech &amp; Ouro", rendered)
         self.assertIn("Editorial summary by Tech &amp; Ouro", rendered)
 
+    def test_render_does_not_include_whatsapp_share_button(self):
+        article = valid_payload()["articles"][0]
+        rendered = PublisherAgent().render([article])
+        self.assertNotIn("WhatsApp", rendered)
+        self.assertNotIn("wa.me", rendered)
+
 
 class ProviderSafetyTests(unittest.TestCase):
     def test_removed_provider_does_not_reappear(self):
