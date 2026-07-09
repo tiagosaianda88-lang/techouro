@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+  schedule:
+    - cron: '0 */6 * * *'
   workflow_dispatch:
 
 jobs:
@@ -33,5 +35,5 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action AI"
-          git add noticias.html paises.html economia.html desporto.html mercados.html tech.html geopolitica.html ouro.html conteudos/news-archive.json
+          git add index.html noticias.html paises.html economia.html desporto.html mercados.html tech.html geopolitica.html ouro.html conteudos/news-archive.json
           git diff --quiet && git diff --staged --quiet || (git commit -m "update news" && git push origin HEAD:main)

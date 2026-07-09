@@ -41,6 +41,8 @@ RSS_FEEDS = [
 
 START_MARKER = "<!-- AI_NEWS_START -->"
 END_MARKER = "<!-- AI_NEWS_END -->"
+INDEX_NEWS_LIMIT = 10
+INDEX_NEW_ARTICLES_LIMIT = 6
 ALLOWED_LINKS = {
     "economy": "economia.html",
     "markets": "mercados.html",
@@ -234,7 +236,7 @@ Rules:
 - Prioritize manual source files (like those ending in .txt or .pdf, or image contents) over RSS feeds (like WSJ, Bloomberg, Reuters, etc.) if they are present in the source material.
 - Generate highly engaging, catchy, tabloid-style headlines (title_pt and title_en) designed to grab attention and drive clicks. The titles MUST be magnetic and irresistible, just like a British tabloid.
 - However, the body of the article (body_pt and body_en) MUST remain a serious, factual, deep, and professional analysis of at least 220 to 300 words. We attract them with the tabloid title, but we retain them with high-quality, deep financial and technological information. Never invent facts.
-- For the summary (summary_pt and summary_en), write a punchy, 2-sentence hook that bridges the shocking title with the serious facts.
+- For the summary (summary_pt and summary_en), write a punchy hook with 220 to 300 characters that bridges the shocking title with the serious facts.
 - IMPORTANT ROUTING RULES: American news, especially from Wall Street sources, normally goes to the 'countries' category. American football news goes to the 'sports' category. The most bombastic and explosive news stories must be prioritized.
 - Never invent facts, dates, sources, quotes, prices, or events.
 - Every story must have complete Portuguese and English text.
@@ -371,7 +373,7 @@ class PublisherAgent:
             if categories is None:
                 filtered = sorted_articles
                 if path.name == "index.html":
-                    filtered = sorted_articles[:10]
+                    filtered = self._index_rotation(sorted_articles)
             else:
                 filtered = [a for a in sorted_articles if a.get("category") in categories]
 
@@ -383,7 +385,7 @@ class PublisherAgent:
                 print(f"Publisher: skipping {path} due to error: {e}")
 
         if dry_run:
-            index_filtered = sorted_articles[:10]
+            index_filtered = self._index_rotation(sorted_articles)
             rendered_html = self.render(index_filtered)
             Path("news-preview.html").write_text(rendered_html, encoding="utf-8")
             print("Publisher: dry run written to news-preview.html; site HTML untouched.")
@@ -392,6 +394,27 @@ class PublisherAgent:
         for path, content in updates.items():
             atomic_write(path, content)
             print(f"Publisher: updated {path}.")
+
+    @staticmethod
+    def _index_rotation(sorted_articles):
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        today_articles = [a for a in sorted_articles if a.get("date") == today_str]
+        older_articles = [a for a in sorted_articles if a.get("date") != today_str]
+        selected = today_articles[:INDEX_NEW_ARTICLES_LIMIT]
+        selected.extend(older_articles[: INDEX_NEWS_LIMIT - len(selected)])
+
+        if len(selected) < INDEX_NEWS_LIMIT:
+            selected_ids = {a.get("url") or normalize(a.get("title_pt", "")) for a in selected}
+            for article in sorted_articles:
+                article_id = article.get("url") or normalize(article.get("title_pt", ""))
+                if article_id in selected_ids:
+                    continue
+                selected.append(article)
+                selected_ids.add(article_id)
+                if len(selected) >= INDEX_NEWS_LIMIT:
+                    break
+
+        return selected[:INDEX_NEWS_LIMIT]
 
     @staticmethod
     def _render_article(article):
