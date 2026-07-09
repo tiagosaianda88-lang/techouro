@@ -127,6 +127,8 @@
 #terminal-page .ll{font-size:10.5px;color:#8a9e8a}.lv{font-size:11px;font-weight:500}
 #terminal-page .news-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 #terminal-page .news-item{padding:9px 0;border-bottom:1px solid rgba(201,162,39,0.08)}
+#terminal-page .news-link{display:block;text-decoration:none;color:inherit}
+#terminal-page .news-link:hover .ntt{text-decoration:underline}
 #terminal-page .nsrc2{font-size:8px;color:#C9A227;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:3px}
 #terminal-page .ntt{font-size:10.5px;color:#d8e2d4;line-height:1.45}
 #terminal-page .rr{display:flex;align-items:center;gap:9px;margin-bottom:10px}
@@ -246,50 +248,21 @@
 <div class="sidebar">
   <div class="sbcard">
     <div class="sbtitle">Tech</div>
-    <div class="sbrow">
-      <div>
-        <div class="sbsym">XLK</div>
-        <div class="sbprice">$192.50</div>
-        <div class="sbchg neg">−10.9%</div>
-      </div>
-    </div>
-    <div class="sbrow">
-      <div>
-        <div class="sbsym">SOX</div>
-        <div class="sbprice">$5,420</div>
-        <div class="sbchg neg">−12.3%</div>
-      </div>
-    </div>
-    <div class="sbrow">
-      <div>
-        <div class="sbsym">NVDA</div>
-        <div class="sbprice">$138.40</div>
-        <div class="sbchg pos">+1.8%</div>
-      </div>
-    </div>
+    <div class="sbrow"><a href="https://www.reuters.com/markets/" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none;display:block;width:100%"><div class="sbsym">XLK</div><div class="sbprice" id="xlkPrice">REF</div><div class="sbchg amb">Reuters / ref.</div></a></div>
+    <div class="sbrow"><a href="https://finance.yahoo.com/quote/%5ESOX/" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none;display:block;width:100%"><div class="sbsym">SOX</div><div class="sbprice" id="soxPrice">REF</div><div class="sbchg amb">Yahoo / ref.</div></a></div>
+    <div class="sbrow"><a href="https://www.bloomberg.com/quote/NVDA:US" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none;display:block;width:100%"><div class="sbsym">NVDA</div><div class="sbprice" id="nvdaPrice">REF</div><div class="sbchg amb">Bloomberg / ref.</div></a></div>
   </div>
 
   <div class="sbcard">
     <div class="sbtitle">Ouro</div>
-    <div class="sbrow">
-      <div>
-        <div class="sbsym">SPOT</div>
-        <div class="sbprice">$3,227</div>
-        <div class="sbchg pos">+0.9%</div>
-      </div>
-    </div>
-    <div class="sbrow">
-      <div>
-        <div class="sbsym">YTD</div>
-        <div class="sbprice" style="font-size:18px">+18.4%</div>
-      </div>
-    </div>
+    <div class="sbrow"><a href="https://www.reuters.com/markets/commodities/" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none;display:block;width:100%"><div class="sbsym">SPOT</div><div class="sbprice" id="goldSpot">REF</div><div class="sbchg amb">Reuters / ref.</div></a></div>
+    <div class="sbrow"><a href="https://finance.yahoo.com/quote/GC%3DF/" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none;display:block;width:100%"><div class="sbsym">YTD</div><div class="sbprice" id="goldYtd" style="font-size:18px">REF</div><div class="sbchg amb">Yahoo / ref.</div></a></div>
   </div>
 </div>
 </div>
 
 <div class="sbar">
-  <span class="sd"></span>LIVE · TERMINAL
+  <span class="sd"></span><span id="terminalLiveLabel">LIVE · TERMINAL</span>
   <span id="sbTime">—</span>
 </div>
 
@@ -323,53 +296,95 @@ document.getElementById('btcS').innerHTML='7d <span style="color:#00ff8c">+11.2%
 document.getElementById('btc24h').textContent='+2.84%';
 document.getElementById('halv').textContent=Math.floor((new Date('2028-04-20')-new Date())/864e5).toLocaleString('pt-PT')+'d';
 
+function setText(id, value) {
+  var el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
+function setHtml(id, value) {
+  var el = document.getElementById(id);
+  if (el) el.innerHTML = value;
+}
+
+function liveNumberToText(value, prefix) {
+  var num = Number(value);
+  if (!Number.isFinite(num)) return 'REF';
+  return (prefix || '') + num.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+}
+
+function updateLiveRefs() {
+  fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d && d.bitcoin) {
+        setText('btcP', '$' + Math.round(d.bitcoin.usd).toLocaleString('en-US'));
+        var chg = Number(d.bitcoin.usd_24h_change || 0).toFixed(2);
+        setHtml('btcS', '24h <span style="color:' + (chg >= 0 ? '#00ff8c' : '#ff4466') + '">' + (chg >= 0 ? '+' : '') + chg + '%</span> · REF COINGECKO');
+        setText('btc24h', (chg >= 0 ? '+' : '') + chg + '%');
+      }
+    }).catch(function(){});
+
+  fetch('https://api.frankfurter.app/latest?from=EUR&to=USD')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d && d.rates && d.rates.USD) {
+        setText('eurUsdPrice', Number(d.rates.USD).toFixed(4));
+      }
+    }).catch(function(){});
+}
+
+updateLiveRefs();
+
 // NEWS TICKER
 (function(){
   var n=[
-    ['Reuters','Fed mantém taxas; Powell sinaliza cautela'],
-    ['Bloomberg','BTC ultrapassa $103K com ETFs BlackRock'],
-    ['FT','Berkshire reduz Apple; liquidez máxima'],
-    ['WSJ','Cobre máximos de 3 meses'],
-    ['CNBC','Nvidia lidera Nasdaq com IA'],
-    ['ECO','PSI-20 pressionado pela EDP; Galp consolida']
+    ['Reuters','Fed mantém taxas; Powell sinaliza cautela', 'https://www.reuters.com/world/us/fed/'],
+    ['Bloomberg','BTC ultrapassa $103K com ETFs BlackRock', 'https://www.bloomberg.com/'],
+    ['Yahoo Finance','Mercados abrem em modo de atenção', 'https://finance.yahoo.com/'],
+    ['WSJ','Cobre máximos de 3 meses', 'https://www.wsj.com/'],
+    ['Reuters','Nvidia lidera Nasdaq com IA', 'https://www.reuters.com/technology/'],
+    ['Bloomberg','PSI-20 pressionado pela EDP; Galp consolida', 'https://www.bloomberg.com/']
   ];
-  function b(){return n.map(function(x){return '<div class="ni"><span class="nisrc">'+x[0]+'</span><span class="nitx">'+x[1]+'</span></div>';}).join('');}
+  function b(){return n.map(function(x){return '<a class="ni" href="'+x[2]+'" target="_blank" rel="noopener noreferrer"><span class="nisrc">'+x[0]+'</span><span class="nitx">'+x[1]+'</span></a>';}).join('');}
   document.getElementById('ntrack').innerHTML=b()+b();
 })();
 
 // PRICE TICKER
 (function(){
   var d=[
-    ['BTC','$103,840','+2.8%','pos'],
-    ['S&P 500','5,308','+0.5%','pos'],
-    ['NASDAQ','18,741','+0.71%','pos'],
-    ['GOLD','$3,227','+0.9%','pos'],
-    ['EUR/USD','1.1248','+0.3%','pos'],
-    ['FTSE','8,344','+0.27%','pos'],
-    ['TSX','22,180','+0.4%','pos'],
-    ['DAX','23,486','+0.35%','pos']
+    ['BTC','REF','live','pos'],
+    ['S&P 500','REF','Reuters','pos'],
+    ['NASDAQ','REF','Yahoo','pos'],
+    ['GOLD','REF','Reuters','pos'],
+    ['EUR/USD','REF','Frankfurter','pos'],
+    ['FTSE','REF','Reuters','pos'],
+    ['TSX','REF','Reuters','pos'],
+    ['DAX','REF','Reuters','pos']
   ];
-  function b(){return d.map(function(t){return '<div class="ti"><span class="tsy">'+t[0]+'</span><span class="tpr">'+t[1]+'</span><span class="'+t[3]+'" style="font-size:10px">'+t[2]+'</span></div>';}).join('');}
+  function b(){return d.map(function(t){
+    var value = t[0] === 'EUR/USD' ? '<span id="eurUsdPrice">1.1248</span>' : t[1];
+    return '<div class="ti"><span class="tsy">'+t[0]+'</span><span class="tpr">'+value+'</span><span class="'+t[3]+'" style="font-size:10px">'+t[2]+'</span></div>';
+  }).join('');}
   document.getElementById('ttrack').innerHTML=b()+b();
 })();
 
 // NOTÍCIAS
 (function(){
   var n=[
-    ['Reuters','Fed mantém taxas; Powell sinaliza cautela sobre inflação'],
-    ['Bloomberg','BTC ultrapassa $103K com entradas recorde nos ETFs BlackRock'],
-    ['FT','Berkshire reduz Apple para $135B; liquidez em máximo histórico'],
-    ['WSJ','Cobre em máximos de 3 meses com transição energética'],
-    ['Bloomberg','BCE prepara corte adicional de 25bp em Junho'],
-    ['CNBC','Nvidia lidera Nasdaq; entusiasmo com IA mantém Wall St em alta'],
-    ['Reuters','Nikkei sobe 1,1% com iene fraco a impulsionar exportadoras'],
-    ['FT','Ouro consolida acima de $3,200 com compras de bancos centrais'],
-    ['Bloomberg','China: estímulos somam $140B para travar abrandamento imobiliário'],
-    ['Reuters','Petróleo recua com receios de procura apesar de tensão no Médio Oriente'],
-    ['ECO','PSI-20 pressionado pela EDP; Galp consolida posições'],
-    ['Bloomberg','Dollar index recua; mercados emergentes ganham fôlego']
+    ['Reuters','Fed mantém taxas; Powell sinaliza cautela sobre inflação', 'https://www.reuters.com/world/us/fed/'],
+    ['Bloomberg','BTC ultrapassa $103K com entradas recorde nos ETFs BlackRock', 'https://www.bloomberg.com/'],
+    ['Yahoo Finance','Stock market today: Nasdaq rises, Dow and S&P 500 retreat as oil prices climb', 'https://finance.yahoo.com/'],
+    ['WSJ','Cobre em máximos de 3 meses com transição energética', 'https://www.wsj.com/'],
+    ['Bloomberg','BCE prepara corte adicional de 25bp em Junho', 'https://www.bloomberg.com/'],
+    ['Reuters','Nvidia lidera Nasdaq; entusiasmo com IA mantém Wall St em alta', 'https://www.reuters.com/technology/'],
+    ['Reuters','Nikkei sobe 1,1% com iene fraco a impulsionar exportadoras', 'https://www.reuters.com/markets/asia/'],
+    ['FT','Ouro consolida acima de $3,200 com compras de bancos centrais', 'https://www.ft.com/markets'],
+    ['Bloomberg','China: estímulos somam $140B para travar abrandamento imobiliário', 'https://www.bloomberg.com/'],
+    ['Reuters','Petróleo recua com receios de procura apesar de tensão no Médio Oriente', 'https://www.reuters.com/business/energy/'],
+    ['Yahoo Finance','PSI-20 pressionado pela EDP; Galp consolida posições', 'https://finance.yahoo.com/'],
+    ['Bloomberg','Dollar index recua; mercados emergentes ganham fôlego', 'https://www.bloomberg.com/']
   ];
-  var html=n.map(function(x){return '<div class="news-item"><div class="nsrc2">'+x[0]+'</div><div class="ntt">'+x[1]+'</div></div>';}).join('');
+  var html=n.map(function(x){return '<div class="news-item"><a class="news-link" href="'+x[2]+'" target="_blank" rel="noopener noreferrer"><div class="nsrc2">'+x[0]+'</div><div class="ntt">'+x[1]+'</div></a></div>';}).join('');
   document.getElementById('newsPanel').innerHTML=html;
 })();
 
