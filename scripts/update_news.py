@@ -413,7 +413,14 @@ class PublisherAgent:
 </div>'''
 
     def publish(self, archive_articles, dry_run=False):
-        sorted_articles = sorted(archive_articles, key=lambda x: x.get("date", ""), reverse=True)
+        sorted_articles = [
+            article
+            for _, article in sorted(
+                enumerate(archive_articles),
+                key=lambda indexed: (indexed[1].get("date", ""), indexed[0]),
+                reverse=True,
+            )
+        ]
 
         pages_categories = {
             Path("index.html"): None,  # limit to 10
@@ -512,7 +519,7 @@ class PublisherAgent:
         <span class="editorial-attribution"><span lang="pt">Resumo editorial Tech &amp; Ouro</span><span lang="en">Editorial summary by Tech &amp; Ouro</span></span>
       </div>
       <div style="display: flex; gap: 8px; margin-left: auto;">
-        <a href="{link}" class="read-full-link" data-open-article="true" aria-label="Ler tudo / Read all">→</a>
+        <a href="{link}" class="read-full-link" data-open-article="true" aria-label="Abrir artigo / Open article">→</a>
       </div>
     </div>
   </div>
