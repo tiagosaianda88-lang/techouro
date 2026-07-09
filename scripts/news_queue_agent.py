@@ -59,12 +59,29 @@ def max_age_for(source_dir, path, daily_hours, monthly_days):
     return daily_hours * 60 * 60
 
 
+def captured_timestamp(path):
+    match = re.search(
+        r"(20\d{2})-(\d{2})-(\d{2}).*?(\d{2})[.:h](\d{2})[.:h](\d{2})",
+        path.name,
+    )
+    if not match:
+        return None
+    try:
+        return datetime(*map(int, match.groups())).timestamp()
+    except ValueError:
+        return None
+
+
+def source_timestamp(path):
+    return captured_timestamp(path) or path.stat().st_mtime
+
+
 def partition_fresh_and_stale(source_dir, files, daily_hours, monthly_days):
     now = datetime.now().timestamp()
     fresh = []
     stale = []
     for path in files:
-        age_seconds = now - path.stat().st_mtime
+        age_seconds = now - source_timestamp(path)
         if age_seconds > max_age_for(source_dir, path, daily_hours, monthly_days):
             stale.append(path)
         else:
@@ -82,9 +99,9 @@ def sorted_sources(source_dir, order, max_age_hours=30, monthly_max_age_days=45,
     files = files if include_stale else fresh
     monthly_priority = lambda p: 1 if is_monthly_source(source_dir, p) else 0
     if order == "oldest-first":
-        return sorted(files, key=lambda p: (monthly_priority(p), p.stat().st_mtime, p.name.lower()))
+        return sorted(files, key=lambda p: (monthly_priority(p), source_timestamp(p), p.name.lower()))
     if order == "newest-first":
-        return sorted(files, key=lambda p: (monthly_priority(p), -p.stat().st_mtime, p.name.lower()))
+        return sorted(files, key=lambda p: (monthly_priority(p), -source_timestamp(p), p.name.lower()))
     if order == "name-desc":
         return sorted(files, key=lambda p: (monthly_priority(p), p.name.lower()), reverse=True)
     return sorted(files, key=lambda p: (monthly_priority(p), p.name.lower()))
