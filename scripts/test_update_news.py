@@ -63,6 +63,14 @@ class PublisherAgentTests(unittest.TestCase):
         self.assertNotIn("<script>", rendered)
         self.assertIn("&lt;script&gt;", rendered)
 
+    def test_render_includes_editorial_source_attribution(self):
+        article = valid_payload()["articles"][0]
+        rendered = PublisherAgent().render([article])
+        self.assertIn("Fonte: ", rendered)
+        self.assertIn("Source: ", rendered)
+        self.assertIn("Resumo editorial Tech &amp; Ouro", rendered)
+        self.assertIn("Editorial summary by Tech &amp; Ouro", rendered)
+
 
 class ProviderSafetyTests(unittest.TestCase):
     def test_removed_provider_does_not_reappear(self):

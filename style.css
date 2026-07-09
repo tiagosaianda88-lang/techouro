@@ -539,6 +539,29 @@ nav {
   margin-top: auto;
 }
 
+.source-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.source-attribution,
+.editorial-attribution {
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+}
+
+.source-attribution a {
+  color: var(--gold);
+  text-decoration: underline;
+}
+
+.editorial-attribution {
+  color: var(--text-secondary);
+  text-transform: none;
+}
+
 /* Small Card styles */
 .card-sm {
   padding: 24px;

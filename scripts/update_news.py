@@ -520,9 +520,10 @@ class PublisherAgent:
   </div>
   <div class="card-meta" onclick="event.stopPropagation();">
     <div style="display: flex; gap: 10px; width: 100%; justify-content: space-between; flex-wrap: wrap;">
-      <div>
-        <span>{date_html} | </span>
-        <span><a href="{esc["url"]}" target="_blank" rel="noopener noreferrer" style="color: #d4af37; text-decoration: underline;">{esc["source"]}</a></span>
+      <div class="source-stack">
+        <span>{date_html}</span>
+        <span class="source-attribution"><span lang="pt">Fonte: </span><span lang="en">Source: </span><a href="{esc["url"]}" target="_blank" rel="noopener noreferrer">{esc["source"]}</a></span>
+        <span class="editorial-attribution"><span lang="pt">Resumo editorial Tech &amp; Ouro</span><span lang="en">Editorial summary by Tech &amp; Ouro</span></span>
       </div>
       <div style="display: flex; gap: 8px;">
         <a href="https://wa.me/?text=Olha%20esta%20not%C3%ADcia%3A%20{esc['url']}" target="_blank" rel="noopener noreferrer" style="background: #25D366; color: white; padding: 2px 8px; border-radius: 4px; text-decoration: none; font-weight: bold;">WhatsApp</a>
