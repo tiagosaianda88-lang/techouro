@@ -16,7 +16,7 @@ Abaixo está o resumo detalhado do que foi feito:
 
 ## 3. Secção de Notícias ao Vivo (Live News)
 * **Ampliação e Grelha de Quadrados**: Redesenhámos o layout de [noticias.html](noticias.html) para ser significativamente mais largo (1200px) e estruturado numa grelha responsiva de **3 colunas** (`cards-3`) contendo cartões quadrados de conteúdo.
-* **Automação**: O script de agregação automatizada de notícias [scripts/update_news.py](scripts/update_news.py) foi atualizado para instruir o modelo Gemini a selecionar entre **6 a 8 notícias** (anteriormente 5), encaixando perfeitamente na nova grelha.
+* **Automação**: O script de agregação automatizada de notícias [scripts/update_news.py](scripts/update_news.py) foi ajustado para selecionar entre **6 a 8 notícias** (anteriormente 5), encaixando perfeitamente na nova grelha.
 
 ## 4. Secção "Sobre" (About) e Configurações Globais
 * **Editorial Universal**: Removemos completamente todas as menções restritas a "feito para portugueses", "brasileiros" ou "comunidades lusófonas" nas páginas [sobre.html](sobre.html), [index.html](index.html), [economia.html](economia.html), [artigo-2.html](artigo-2.html) e nos rodapés globais.

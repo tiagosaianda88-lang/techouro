@@ -18,11 +18,11 @@
 * **Language:** Bilingual (Portuguese/English).
 * **Focus:** Target files in the `scripts` and `conteudos` folders.
 
-## Current Status (End of Day 2 - Gemini Integration)
+## Current Status
 * **Safari Issue:** Safari Reader mode triggered automatically on `mercados.html` and `tech.html`. Fixed by replacing semantic tags (`<header>`, `<section>`) with `<div>`.
 * **News Design:** Changed the image pipeline to use a CSS-only "Gold Mosaic" premium banner instead of relying on external image APIs. The site looks very premium.
 * **Countries Page (`paises.html`):** Cleaned up layout, removed dummy cards, added a unified `<!-- AI_NEWS_START -->` block at the bottom for global news, keeping tabs clean for macro stats.
-* **Gemini Automation:** The user created a Google AI Studio API key (`GEMINI_API_KEY`). It is exported in `~/.zshrc` and `~/.bash_profile`. The `update_news.py` script now successfully runs 100% automated AI journalism.
+* **AI Provider:** The previous Google AI provider has been removed at Tiago's request. Do not restore or call it unless Tiago explicitly chooses a fresh provider setup.
 * **Next Assistant Instructions:** When Tiago opens a new conversation, acknowledge that you read this status and are ready to continue Phase 1 work at 150%. No need to repeat the history, just say you are the "Novo Diretor de Arte".
 
 ## Operational Agents

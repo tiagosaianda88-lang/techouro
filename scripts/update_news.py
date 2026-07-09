@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 import feedparser
-from google import genai
 
 
 RSS_FEEDS = [
@@ -59,6 +58,15 @@ QUEUE_SOURCE_URLS = {
     "record": "https://www.record.pt/",
     "reuters": "https://www.reuters.com/",
     "the wall strett journal": "https://www.wsj.com/",
+}
+SOURCE_ALIASES = {
+    "wall street journal": "the wall strett journal",
+    "the wall street journal": "the wall strett journal",
+    "wsj": "the wall strett journal",
+    "jornal noticias": "jornal de noticias",
+    "jn": "jornal de noticias",
+    "jornal negocios": "jornal de negocios",
+    "ojogo": "o jogo",
 }
 ALLOWED_LINKS = {
     "economy": "economia.html",
@@ -263,45 +271,6 @@ class SelectorAgent:
         return selected
 
 
-class EditorAgent:
-    def __init__(self, api_key):
-        if not api_key:
-            raise ValueError("GEMINI_API_KEY environment variable not set")
-        self.client = genai.Client(api_key=api_key)
-
-    def edit(self, items, images):
-        source_json = json.dumps([asdict(item) for item in items], ensure_ascii=False)
-        prompt = f"""
-You are the bilingual editor of Tech & Ouro. Select 10 factual, important
-stories for investors and technology readers from the supplied material.
-
-Rules:
-- Prioritize manual source files (like those ending in .txt or .pdf, or image contents) over RSS feeds (like WSJ, Bloomberg, Reuters, etc.) if they are present in the source material.
-- Generate highly engaging, catchy, tabloid-style headlines (title_pt and title_en) designed to grab attention and drive clicks. The titles MUST be magnetic and irresistible, just like a British tabloid.
-- However, the body of the article (body_pt and body_en) MUST remain a serious, factual, deep, and professional analysis of at least 220 to 300 words. We attract them with the tabloid title, but we retain them with high-quality, deep financial and technological information. Never invent facts.
-- For the summary (summary_pt and summary_en), write a punchy hook with 220 to 300 characters that bridges the shocking title with the serious facts.
-- IMPORTANT ROUTING RULES: American news, especially from Wall Street sources, normally goes to the 'countries' category. American football news goes to the 'sports' category. The most bombastic and explosive news stories must be prioritized.
-- Never invent facts, dates, sources, quotes, prices, or events.
-- Every story must have complete Portuguese and English text.
-- category must be exactly one of: {', '.join(CATEGORY_LABELS)}.
-- source must name one supplied source.
-- Return JSON only, with an object containing an `articles` array.
-- Each article must contain: category, source, url, title_pt, title_en,
-  summary_pt, summary_en, body_pt, body_en.
-- You must return the exact `url` of the selected article from the source material. Do not invent or modify the URL.
-
-Source material:
-{source_json}
-"""
-        contents = [prompt, *images]
-        response = self.client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=contents,
-            config={"response_mime_type": "application/json"},
-        )
-        return json.loads(response.text)
-
-
 class VerifierAgent:
     REQUIRED = ("category", "source", "url", "title_pt", "title_en", "summary_pt", "summary_en", "body_pt", "body_en")
 
@@ -314,20 +283,31 @@ class VerifierAgent:
         verified = []
         titles = set()
         normalized_sources = set()
+        source_by_normalized = {}
         for s in known_sources:
-            normalized_sources.add(normalize(s))
+            normalized = normalize(s)
+            normalized_sources.add(normalized)
+            source_by_normalized[normalized] = s
             base = re.sub(r"\s+\(part\s+\d+\)", "", s, flags=re.IGNORECASE)
-            normalized_sources.add(normalize(base))
+            normalized_base = normalize(base)
+            normalized_sources.add(normalized_base)
+            source_by_normalized[normalized_base] = base
 
         for name, _ in RSS_FEEDS:
-            normalized_sources.add(normalize(name))
+            normalized = normalize(name)
+            normalized_sources.add(normalized)
+            source_by_normalized[normalized] = name
 
         content_dir = Path("conteudos")
         if content_dir.exists():
             for path in content_dir.iterdir():
                 if path.is_file():
-                    normalized_sources.add(normalize(path.name))
-                    normalized_sources.add(normalize(path.stem))
+                    normalized_name = normalize(path.name)
+                    normalized_stem = normalize(path.stem)
+                    normalized_sources.add(normalized_name)
+                    normalized_sources.add(normalized_stem)
+                    source_by_normalized[normalized_name] = path.name
+                    source_by_normalized[normalized_stem] = path.stem
 
         for position, article in enumerate(articles, 1):
             if not isinstance(article, dict):
@@ -337,7 +317,18 @@ class VerifierAgent:
                 raise ValueError(f"Verifier: article {position} missing {', '.join(missing)}")
             if article["category"] not in CATEGORY_LABELS:
                 raise ValueError(f"Verifier: invalid category in article {position}")
-            if normalize(article["source"]) not in normalized_sources:
+            normalized_source = normalize(article["source"])
+            if normalized_source not in normalized_sources:
+                alias = SOURCE_ALIASES.get(normalized_source)
+                if alias and normalize(alias) in normalized_sources:
+                    article["source"] = alias
+                else:
+                    matched_source = self._match_known_source(normalized_source, source_by_normalized)
+                    if matched_source:
+                        article["source"] = matched_source
+                    else:
+                        raise ValueError(f"Verifier: unknown source in article {position}")
+            if not article["source"]:
                 raise ValueError(f"Verifier: unknown source in article {position}")
 
             for text_field in ("title_pt", "title_en", "summary_pt", "summary_en"):
@@ -353,6 +344,17 @@ class VerifierAgent:
 
         print(f"Verifier: {len(verified)} articles approved.")
         return verified
+
+    @staticmethod
+    def _match_known_source(normalized_source, source_by_normalized):
+        if not normalized_source:
+            return ""
+        for known_normalized, known_source in source_by_normalized.items():
+            if not known_normalized:
+                continue
+            if known_normalized in normalized_source or normalized_source in known_normalized:
+                return known_source
+        return ""
 
     @staticmethod
     def _has_balanced_brackets(text):
@@ -660,27 +662,13 @@ def run(action="generate", dry_run=False):
     selected = SelectorAgent().select(items)
     write_queue_draft_sources(selected)
     
-    is_fallback = False
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        print("Warning: GEMINI_API_KEY environment variable not set. Falling back to conteudos/manual-news.json")
-        manual_path = Path("conteudos/manual-news.json")
-        if manual_path.exists():
-            payload = json.loads(manual_path.read_text(encoding="utf-8"))
-            is_fallback = True
-        else:
-            raise ValueError("GEMINI_API_KEY environment variable not set and conteudos/manual-news.json not found")
+    is_fallback = True
+    manual_path = Path("conteudos/manual-news.json")
+    if manual_path.exists():
+        print("Generator: using conteudos/manual-news.json.")
+        payload = json.loads(manual_path.read_text(encoding="utf-8"))
     else:
-        try:
-            payload = EditorAgent(api_key).edit(selected, images)
-        except Exception as e:
-            print(f"Gemini API call failed: {e}. Falling back to conteudos/manual-news.json")
-            manual_path = Path("conteudos/manual-news.json")
-            if manual_path.exists():
-                payload = json.loads(manual_path.read_text(encoding="utf-8"))
-                is_fallback = True
-            else:
-                raise e
+        raise ValueError("No AI provider is configured and conteudos/manual-news.json was not found")
 
     known_sources = {item.source for item in selected}
     if is_fallback and isinstance(payload, dict) and isinstance(payload.get("articles"), list):

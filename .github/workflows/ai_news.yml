@@ -1,11 +1,6 @@
 name: AI News Aggregator
 
 on:
-  push:
-    branches:
-      - main
-  schedule:
-    - cron: '0 */6 * * *'
   workflow_dispatch:
 
 jobs:
@@ -23,10 +18,8 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install feedparser google-genai beautifulsoup4 pypdf
+          pip install feedparser beautifulsoup4 pypdf
       - name: Run AI News and Country Scripts
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           python scripts/update_news.py
           python scripts/update_news.py --publish

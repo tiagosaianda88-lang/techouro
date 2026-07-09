@@ -2,7 +2,6 @@ import os
 import json
 import feedparser
 from bs4 import BeautifulSoup
-from google import genai
 
 # The HTML file to update
 HTML_FILE = "paises.html"
@@ -52,64 +51,6 @@ def fetch_country_news(feed_url):
         summary = entry.get("summary", "")
         articles.append(f"Title: {title}\nSummary: {summary}\n---")
     return "\n".join(articles)
-
-def generate_country_dashboard(country_id, country_name, news_text):
-    print(f"Generating dashboard data for {country_name}...")
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        raise ValueError("GEMINI_API_KEY environment variable not set!")
-        
-    client = genai.Client(api_key=api_key)
-    
-    prompt = f"""
-    You are an expert news editor for 'Tech & Ouro', a premium Portuguese/English news site.
-    Read the following recent news articles about {country_name} and generate the dashboard contents.
-    
-    You need to select and generate 3 articles for each of the following 3 categories:
-    1. 'tech': Technology, AI, Startups, or Big Tech.
-    2. 'finance': Finance, Capital Markets, Macroeconomics, or Commodities.
-    3. 'general': General News, Politics, or Sports.
-    
-    For each chosen article, you must generate a 'cat-item' block in HTML. Make sure the tag (e.g. IA, Finanças, F1, etc.), title, and date are fully translated into both Portuguese and English using span tags with lang="pt" and lang="en" attributes.
-    
-    The HTML structure for each 'cat-item' block must be exactly:
-    <div class="cat-item">
-      <div class="cat-item-tag">TAG (e.g., IA, Macro, Futebol)</div>
-      <div class="cat-item-title">
-        <span lang="pt">Portuguese title here</span>
-        <span lang="en">English translation of title here</span>
-      </div>
-      <div class="cat-item-date">HOJE / TODAY</div>
-    </div>
-    
-    You must return a JSON object with three keys: 'tech', 'finance', and 'general'.
-    Each key's value must contain exactly the 3 concatenated 'cat-item' HTML blocks for that category. Do not include any other HTML formatting or code blocks.
-    
-    Example response format:
-    {{
-      "tech": "<div class=\\"cat-item\\">...</div><div class=\\"cat-item\\">...</div><div class=\\"cat-item\\">...</div>",
-      "finance": "<div class=\\"cat-item\\">...</div><div class=\\"cat-item\\">...</div><div class=\\"cat-item\\">...</div>",
-      "general": "<div class=\\"cat-item\\">...</div><div class=\\"cat-item\\">...</div><div class=\\"cat-item\\">...</div>"
-    }}
-    
-    Here are the raw articles for {country_name}:
-    {news_text}
-    """
-    
-    response = client.models.generate_content(
-        model='gemini-2.5-flash',
-        contents=prompt,
-        config={
-            'response_mime_type': 'application/json'
-        }
-    )
-    
-    try:
-        return json.loads(response.text)
-    except Exception as e:
-        print(f"Error parsing JSON response: {e}")
-        print(response.text)
-        return None
 
 def update_paises_html(dashboards):
     print(f"Updating {HTML_FILE}...")
@@ -172,11 +113,8 @@ def update_block_items(block_element, new_items_html):
 
 if __name__ == "__main__":
     try:
-        # Check active countries in paises.html first to save tokens and time
-        api_key = os.environ.get("GEMINI_API_KEY")
-        if not api_key:
-            print("Warning: GEMINI_API_KEY environment variable not set. Skipping countries dashboard update.")
-            exit(0)
+        print("No AI provider is configured. Skipping countries dashboard update.")
+        exit(0)
 
         active_ids = set()
         if os.path.exists(HTML_FILE):
@@ -205,4 +143,3 @@ if __name__ == "__main__":
             print("No dashboards updated.")
     except Exception as e:
         print(f"Failed to update countries: {e}")
-
