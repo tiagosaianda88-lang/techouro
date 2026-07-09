@@ -1165,23 +1165,7 @@ footer {
 
 /* Persistent bottom corner floating badge */
 .footer-fixed-badge {
-  position: fixed;
-  top: auto;
-  bottom: 20px;
-  right: 20px;
-  z-index: 999;
-  background: rgba(15, 15, 15, 0.8);
-  backdrop-filter: blur(8px);
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  padding: 3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-md);
-  transition: var(--transition);
-  width: min(4cm, calc(100vw - 24px)) !important;
-  height: min(4cm, calc(100vw - 24px)) !important;
+  display: none !important;
 }
 
 .footer-fixed-badge img {
