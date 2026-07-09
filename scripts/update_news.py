@@ -25,6 +25,7 @@ RSS_FEEDS = [
     ("A Bola", "https://news.google.com/rss/search?q=when:1d+site:abola.pt&hl=pt-PT&gl=PT&ceid=PT:pt"),
     ("Record", "https://news.google.com/rss/search?q=when:1d+site:record.pt&hl=pt-PT&gl=PT&ceid=PT:pt"),
     ("InfoMoney", "https://news.google.com/rss/search?q=when:1d+site:infomoney.com.br&hl=pt-BR&gl=BR&ceid=BR:pt-419"),
+    ("BBC UK Countries", "https://news.google.com/rss/search?q=when:1d+site:bbc.com/news+OR+site:bbc.co.uk/news+UK+OR+Britain+OR+London&hl=en-GB&gl=GB&ceid=GB:en"),
     ("CNBC", "https://news.google.com/rss/search?q=when:1d+source:cnbc&hl=en-US&gl=US&ceid=US:en"),
     ("Reuters", "https://news.google.com/rss/search?q=when:1d+source:reuters&hl=en-US&gl=US&ceid=US:en"),
     ("Google Wall Street", "https://news.google.com/rss/search?q=when:1d+wall+street&hl=en-US&gl=US&ceid=US:en"),
@@ -42,6 +43,22 @@ START_MARKER = "<!-- AI_NEWS_START -->"
 END_MARKER = "<!-- AI_NEWS_END -->"
 INDEX_NEWS_LIMIT = 10
 INDEX_NEW_ARTICLES_LIMIT = 6
+INDEX_MARKET_FOCUS_SOURCES = ("infomoney", "bbc uk countries")
+INDEX_MARKET_FOCUS_KEYWORDS = (
+    "brasil",
+    "brazil",
+    "united kingdom",
+    "britain",
+    "great britain",
+    "british",
+    "london",
+    "reino unido",
+    "wimbledon",
+    "silverstone",
+    "ftse",
+    "bank of england",
+)
+INDEX_MARKET_FOCUS_CATEGORIES = {"countries", "markets", "economy", "geopolitics", "sports"}
 QUEUE_MANIFEST_PATH = Path("conteudos/news-queue-manifest.json")
 QUEUE_DRAFT_SOURCES_PATH = Path("conteudos/news-draft-sources.json")
 QUEUE_SOURCE_URLS = {
@@ -251,6 +268,10 @@ class SelectorAgent:
     """Removes duplicates before sending material to the model."""
 
     def select(self, items, limit=20):
+        items = sorted(
+            items,
+            key=lambda item: (-index_market_focus_score(asdict(item)), normalize(item.title)),
+        )
         selected = []
         seen = set()
         for item in items:
@@ -484,7 +505,7 @@ class PublisherAgent:
                 if len(selected) >= INDEX_NEWS_LIMIT:
                     break
 
-        return selected[:INDEX_NEWS_LIMIT]
+        return promote_index_market_focus(selected[:INDEX_NEWS_LIMIT], sorted_articles)
 
     @staticmethod
     def _render_article(article):
@@ -533,6 +554,73 @@ def clean_text(value):
 def normalize(value):
     value = unicodedata.normalize("NFKD", clean_text(value)).encode("ascii", "ignore").decode()
     return re.sub(r"[^a-z0-9]+", " ", value.lower()).strip()
+
+
+def article_identity(article):
+    return article.get("url") or normalize(article.get("title_pt", ""))
+
+
+def index_market_focus_score(article):
+    source = normalize(article.get("source", ""))
+    title = normalize(article.get("title_pt", ""))
+    summary = normalize(article.get("summary_pt", ""))
+    body = normalize(article.get("body_pt", ""))
+    haystack = " ".join(part for part in (source, title, summary, body) if part)
+    tokens = set(haystack.split())
+    source_match = any(focus_source in source for focus_source in INDEX_MARKET_FOCUS_SOURCES)
+    keyword_match = False
+    for keyword in INDEX_MARKET_FOCUS_KEYWORDS:
+        normalized_keyword = normalize(keyword)
+        if not normalized_keyword:
+            continue
+        if " " in normalized_keyword:
+            if normalized_keyword in haystack:
+                keyword_match = True
+                break
+        elif normalized_keyword in tokens:
+            keyword_match = True
+            break
+
+    score = 0
+    if source_match:
+        score += 8
+    if keyword_match:
+        score += 6
+    if (source_match or keyword_match) and article.get("category") in INDEX_MARKET_FOCUS_CATEGORIES:
+        score += 2
+    if keyword_match and article.get("category") == "countries":
+        score += 2
+    return score
+
+
+def promote_index_market_focus(selected, sorted_articles):
+    focused = []
+    used = set()
+    for article in sorted_articles:
+        if index_market_focus_score(article) <= 0:
+            continue
+        key = article_identity(article)
+        if key in used:
+            continue
+        focused.append(article)
+        used.add(key)
+        if len(focused) >= 2:
+            break
+
+    if not focused:
+        return selected
+
+    combined = focused[:]
+    used = {article_identity(article) for article in combined}
+    for article in selected:
+        key = article_identity(article)
+        if key in used:
+            continue
+        combined.append(article)
+        used.add(key)
+        if len(combined) >= INDEX_NEWS_LIMIT:
+            break
+    return combined[:INDEX_NEWS_LIMIT]
 
 
 def replace_news_block(content, rendered_html):
