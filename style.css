@@ -455,7 +455,7 @@ body.home .index-final-row {
   margin-bottom: 76px !important;
 }
 
-body.home .index-extra-hidden {
+.balanced-extra-hidden {
   display: none !important;
 }
 

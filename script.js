@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setLanguage(savedLang);
   updateHeroDate();
   updateDynamicDates();
-  applyHomeCardLayout();
+  applyBalancedCardGrids();
   initArticleInteractions();
   initAdSenseSlots();
   updateHeaderPrices();
@@ -87,24 +87,23 @@ function toggleMobileMenu() {
   if (menuBtn) menuBtn.classList.toggle('active');
 }
 
-function applyHomeCardLayout() {
-  if (!document.body.classList.contains('home')) return;
+function applyBalancedCardGrids() {
+  const grids = document.querySelectorAll('.cards-2, .cards-3');
+  grids.forEach(grid => {
+    const cards = [...grid.querySelectorAll(':scope > .card:not(.in-feed-ad)')];
+    cards.forEach(card => {
+      card.classList.remove('index-final-row', 'balanced-extra-hidden');
+    });
 
-  const grid = document.querySelector('.cards-2');
-  if (!grid) return;
+    if (cards.length % 2 === 1) {
+      cards[cards.length - 1].classList.add('balanced-extra-hidden');
+    }
 
-  const cards = [...grid.querySelectorAll('.card:not(.in-feed-ad)')];
-  cards.forEach(card => {
-    card.classList.remove('index-final-row', 'index-extra-hidden');
+    if (document.body.classList.contains('home')) {
+      const pairedCards = cards.filter(card => !card.classList.contains('balanced-extra-hidden'));
+      pairedCards.slice(-2).forEach(card => card.classList.add('index-final-row'));
+    }
   });
-
-  const visibleCards = cards.filter(card => !card.hidden);
-  if (visibleCards.length % 2 === 1) {
-    visibleCards[visibleCards.length - 1].classList.add('index-extra-hidden');
-  }
-
-  const pairedCards = visibleCards.filter(card => !card.classList.contains('index-extra-hidden'));
-  pairedCards.slice(-2).forEach(card => card.classList.add('index-final-row'));
 }
 
 function escapeModalHtml(value) {
@@ -178,6 +177,7 @@ function initAdSenseSlots() {
       holder.classList.toggle('ad-slot-empty', status === 'unfilled' || (!status && !hasRenderedAd));
       holder.classList.toggle('ad-slot-filled', status === 'filled' || hasRenderedAd);
     });
+    applyBalancedCardGrids();
   }, 2600);
 }
 
