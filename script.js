@@ -84,6 +84,32 @@ function toggleMobileMenu() {
   if (menuBtn) menuBtn.classList.toggle('active');
 }
 
+function escapeModalHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[char]);
+}
+
+function safeModalUrl(value) {
+  if (!value) return '';
+  try {
+    const url = new URL(value, window.location.href);
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+  } catch {
+    return '';
+  }
+}
+
+function renderModalParagraphs(value, lang) {
+  return value
+    ? value.split(/\n+/).map(para => `<p lang="${lang}">${escapeModalHtml(para.trim())}</p>`).join('')
+    : '';
+}
+
 // Interactive Premium Article Modal Viewer
 function openArticle(cardEl) {
   const catPtEl = cardEl.querySelector('.card-cat [lang="pt"]');
@@ -93,6 +119,9 @@ function openArticle(cardEl) {
   const descPtEl = cardEl.querySelector('.card-desc [lang="pt"]');
   const descEnEl = cardEl.querySelector('.card-desc [lang="en"]');
   const dateEl = cardEl.querySelector('.dynamic-date') || cardEl.querySelector('.card-meta span:first-child');
+  const sourceLinkEl = cardEl.querySelector('.source-attribution a');
+  const editorialPtEl = cardEl.querySelector('.editorial-attribution [lang="pt"]');
+  const editorialEnEl = cardEl.querySelector('.editorial-attribution [lang="en"]');
 
   const catPt = catPtEl ? catPtEl.innerText : (cardEl.querySelector('.card-cat') ? cardEl.querySelector('.card-cat').innerText : 'Geral');
   const catEn = catEnEl ? catEnEl.innerText : catPt;
@@ -100,10 +129,16 @@ function openArticle(cardEl) {
   const titleEn = titleEnEl ? titleEnEl.innerText : titlePt;
   const descPt = descPtEl ? descPtEl.innerText : (cardEl.querySelector('.card-desc') ? cardEl.querySelector('.card-desc').innerText : '');
   const descEn = descEnEl ? descEnEl.innerText : descPt;
-  const url = cardEl.getAttribute('data-url') || '';
+  const sourceName = sourceLinkEl ? sourceLinkEl.innerText : '';
+  const sourceUrl = sourceLinkEl ? sourceLinkEl.href : '';
+  const editorialPt = editorialPtEl ? editorialPtEl.innerText : 'Resumo editorial Tech & Ouro';
+  const editorialEn = editorialEnEl ? editorialEnEl.innerText : 'Editorial summary by Tech & Ouro';
+  const url = cardEl.getAttribute('data-url') || sourceUrl;
   const bodyPt = cardEl.getAttribute('data-body-pt') || '';
   const bodyEn = cardEl.getAttribute('data-body-en') || '';
-  const dateHtml = dateEl ? dateEl.innerHTML : 'HOJE / TODAY';
+  const dateText = dateEl ? dateEl.innerText : 'HOJE / TODAY';
+  const safeUrl = safeModalUrl(url);
+  const safeSourceUrl = safeModalUrl(sourceUrl);
 
   let modal = document.getElementById('article-modal');
   if (!modal) {
@@ -169,25 +204,41 @@ function openArticle(cardEl) {
           border-radius: 3px;
           text-transform: uppercase;
         ">
-          <span lang="pt">${catPt}</span>
-          <span lang="en">${catEn}</span>
+          <span lang="pt">${escapeModalHtml(catPt)}</span>
+          <span lang="en">${escapeModalHtml(catEn)}</span>
         </span>
-        <span style="font-size: 0.8rem; color: #8a9e8a;">${dateHtml}</span>
+        <span style="font-size: 0.8rem; color: #8a9e8a;">${escapeModalHtml(dateText)}</span>
       </div>
 
       <h1 style="font-size: 2rem; margin-bottom: 20px; color: #e8f0e4; line-height: 1.2;">
-        <span lang="pt">${titlePt}</span>
-        <span lang="en">${titleEn}</span>
+        <span lang="pt">${escapeModalHtml(titlePt)}</span>
+        <span lang="en">${escapeModalHtml(titleEn)}</span>
       </h1>
 
       <div style="font-size: 1.1rem; line-height: 1.6; color: #c8d4c4; margin-bottom: 30px; border-left: 3px solid #d4af37; padding-left: 15px; font-style: italic;">
-        <span lang="pt">${descPt}</span>
-        <span lang="en">${descEn}</span>
+        <span lang="pt">${escapeModalHtml(descPt)}</span>
+        <span lang="en">${escapeModalHtml(descEn)}</span>
+      </div>
+
+      <div style="
+        margin: -10px 0 28px;
+        padding: 14px 16px;
+        border: 1px solid rgba(212,175,55,0.22);
+        border-radius: 8px;
+        background: rgba(212,175,55,0.06);
+        color: #d8cfaa;
+        display: grid;
+        gap: 6px;
+        font-size: 0.82rem;
+        line-height: 1.45;
+      ">
+        ${sourceName && safeSourceUrl ? `<div><strong style="color:#d4af37;"><span lang="pt">Fonte:</span><span lang="en">Source:</span></strong> <a href="${escapeModalHtml(safeSourceUrl)}" target="_blank" rel="noopener noreferrer" style="color:#f3e5ab; text-decoration: underline;">${escapeModalHtml(sourceName)}</a></div>` : ''}
+        <div><span lang="pt">${escapeModalHtml(editorialPt)}</span><span lang="en">${escapeModalHtml(editorialEn)}</span></div>
       </div>
 
       <div style="font-size: 1rem; line-height: 1.7; color: #a0b0a0; display: flex; flex-direction: column; gap: 15px;">
-        ${bodyPt ? bodyPt.split(/\n+/).map(para => `<p lang="pt">${para.trim()}</p>`).join('') : ''}
-        ${bodyEn ? bodyEn.split(/\n+/).map(para => `<p lang="en">${para.trim()}</p>`).join('') : ''}
+        ${renderModalParagraphs(bodyPt, 'pt')}
+        ${renderModalParagraphs(bodyEn, 'en')}
       </div>
 
       <div style="margin-top: 25px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(201,162,39,0.2); padding-top: 20px; flex-wrap: wrap; gap: 15px;">
@@ -225,8 +276,8 @@ function openArticle(cardEl) {
             <span class="btn-text">Copy Summary</span>
           </button>
         </div>
-        ${url ? `
-        <a href="${url}" target="_blank" rel="noopener noreferrer" style="
+        ${safeUrl ? `
+        <a href="${escapeModalHtml(safeUrl)}" target="_blank" rel="noopener noreferrer" style="
           color: #d4af37;
           text-decoration: underline;
           font-weight: bold;
@@ -412,4 +463,3 @@ function updateCryptoList() {
       renderTable(fallback);
     });
 }
-

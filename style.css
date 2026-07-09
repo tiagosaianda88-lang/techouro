@@ -1953,6 +1953,141 @@ body.lang-en [lang="pt"] {
   transform: scale(1.03);
 }
 
+.video-source-band {
+  max-width: 1200px;
+  margin: 54px auto 30px;
+  padding: 34px 40px;
+  border-top: 1px solid var(--gold-alpha-heavy);
+  border-bottom: 1px solid var(--gold-alpha-heavy);
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 30px;
+  align-items: center;
+}
+
+.video-source-kicker {
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.video-source-copy h2 {
+  font-size: 1.85rem;
+  line-height: 1.15;
+  margin-bottom: 12px;
+  letter-spacing: 0;
+}
+
+.video-source-copy p:last-child {
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.video-source-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.video-source-card {
+  min-height: 210px;
+  padding: 22px;
+  background:
+    linear-gradient(180deg, rgba(20, 20, 20, 0.98), rgba(7, 7, 7, 0.98));
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  border-radius: var(--radius);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.video-source-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgba(212, 175, 55, 0.16), transparent 48%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 16px);
+  pointer-events: none;
+}
+
+.video-source-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--gold);
+  box-shadow: var(--shadow-gold), var(--shadow-md);
+}
+
+.video-play-mark {
+  position: absolute;
+  top: 20px;
+  left: 22px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--gold);
+  display: grid;
+  place-items: center;
+}
+
+.video-play-mark::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 12px solid #000;
+  margin-left: 3px;
+}
+
+.video-source-label,
+.video-source-origin {
+  position: relative;
+  z-index: 1;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.video-source-card strong {
+  position: relative;
+  z-index: 1;
+  color: var(--text);
+  font-size: 1.15rem;
+  line-height: 1.25;
+}
+
+.video-source-origin {
+  color: var(--text-secondary);
+}
+
+@media (max-width: 900px) {
+  .video-source-band {
+    margin: 38px auto 20px;
+    padding: 28px 16px;
+    grid-template-columns: 1fr;
+  }
+
+  .video-source-card {
+    min-height: 165px;
+  }
+}
+
+@media (max-width: 560px) {
+  .video-source-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ==========================================================================
    Mobile/iPad hardening for news grids and ad slots
    ========================================================================== */

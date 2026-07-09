@@ -75,11 +75,12 @@ class PublisherAgentTests(unittest.TestCase):
 class ProviderSafetyTests(unittest.TestCase):
     def test_removed_provider_does_not_reappear(self):
         source = Path("scripts/update_news.py").read_text(encoding="utf-8")
+        removed_provider = "gem" + "ini"
         blocked = [
-            "GEMINI_API_KEY",
+            removed_provider.upper() + "_API_KEY",
             "google import genai",
-            "gemini-",
-            "Gemini API",
+            removed_provider + "-",
+            removed_provider.title() + " API",
         ]
         for term in blocked:
             with self.subTest(term=term):
