@@ -28,7 +28,7 @@ class TranslationChecker(HTMLParser):
             self.has_global_switcher = True
             
         # Check script.js reference
-        if tag == 'script' and attrs_dict.get('src') == 'script.js':
+        if tag == 'script' and re.match(r'^script\.js(?:\?.*)?$', attrs_dict.get('src', '')):
             self.script_js_referenced = True
             
         # Collect links

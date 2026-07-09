@@ -26,7 +26,8 @@ class StructuralHTMLParser(HTMLParser):
             self.tags_stack.append(tag)
         attrs_dict = dict(attrs)
         
-        if tag == 'div' and attrs_dict.get('class') == 'card':
+        classes = set(attrs_dict.get('class', '').split())
+        if tag == 'div' and 'card' in classes and 'in-feed-ad' not in classes:
             self.cards_count += 1
             self.in_card = True
             self.card_lang_pt_count = 0
@@ -183,7 +184,7 @@ def test_language_and_terminal_widgets():
         content = filepath.read_text(encoding="utf-8")
         assert 'id="lang-btn-pt"' in content, f"Missing PT button in {filepath.name}"
         assert 'id="lang-btn-en"' in content, f"Missing EN button in {filepath.name}"
-        assert 'src="script.js"' in content, f"Missing script.js reference in {filepath.name}"
+        assert re.search(r'src="script\.js(?:\?[^"]*)?"', content), f"Missing script.js reference in {filepath.name}"
         
     print("  - Global language selector and script.js in all files: PASS")
     
@@ -193,9 +194,9 @@ def test_language_and_terminal_widgets():
     term_content = term_path.read_text(encoding="utf-8")
     
     # Verify terminal wrapper and elements
-    assert 'id="term"' in term_content, "Missing #term ID in terminal.html"
+    assert 'id="terminal-page"' in term_content, "Missing #terminal-page ID in terminal.html"
     required_ids = [
-        "clk", "sbTime", "ntrack", "ttrack", "newsPanel", "btcP", "btcS", "halv", "risk", "pTot", "pCost", "pDay"
+        "clk", "sbTime", "ntrack", "ttrack", "newsPanel", "btcP", "btcS", "btc24h", "halv", "risk", "macro", "commod", "ws", "eu", "asia", "uk", "canada", "yields"
     ]
     for element_id in required_ids:
         assert f'id="{element_id}"' in term_content, f"Missing terminal element ID: {element_id}"

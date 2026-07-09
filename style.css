@@ -2113,7 +2113,9 @@ body {
 }
 
 .ticker-container {
+  width: 100%;
   max-width: 100%;
+  overflow-x: hidden;
   contain: paint;
 }
 
@@ -2187,6 +2189,10 @@ body {
 @media (max-width: 760px) {
   body {
     background: var(--bg) !important;
+  }
+
+  .hero-rich-logo {
+    max-width: calc(100vw - 32px);
   }
 
   .hero-glow-bg {

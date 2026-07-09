@@ -220,14 +220,8 @@ class CollectorAgent:
 
     @staticmethod
     def _load_image(path):
-        try:
-            from google.genai import types
-
-            mime = "image/png" if path.suffix.lower() == ".png" else "image/jpeg"
-            return types.Part.from_bytes(data=path.read_bytes(), mime_type=mime)
-        except Exception as exc:
-            print(f"Collector: could not read image {path}: {exc}")
-            return None
+        print(f"Collector: image extraction is skipped for {path}; no external image AI is configured.")
+        return None
 
     @staticmethod
     def _collect_rss():
@@ -394,7 +388,7 @@ class VerifierAgent:
             "shocker",
         }
         normalized_terms = set(normalize(cleaned).split())
-        return uppercase_ratio > 0.55 or bool(blocked_terms & normalized_terms)
+        return (8 <= len(letters) and len(cleaned) <= 240 and uppercase_ratio > 0.55) or bool(blocked_terms & normalized_terms)
 
 
 
@@ -410,16 +404,12 @@ class PublisherAgent:
     @staticmethod
     def _render_adsense_infeed():
         return '''<div class="card in-feed-ad" style="background: transparent; box-shadow: none; padding: 0; border: none;">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2757348402596933" crossorigin="anonymous"></script>
 <ins class="adsbygoogle"
      style="display:block"
      data-ad-format="fluid"
      data-ad-layout-key="-ec+6l-2v-aq+u1"
      data-ad-client="ca-pub-2757348402596933"
      data-ad-slot="8218810488"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
 </div>'''
 
     def publish(self, archive_articles, dry_run=False):
