@@ -37,6 +37,7 @@ The project now runs with these working agents. Any future assistant should use 
 * Must keep summaries tight, factual, and bilingual. Never invent facts, dates, sources, prices, quotes, or URLs.
 * Desktop news queue lives at `/Users/tmss1988/Desktop/tech e ouro`. Use `python3 scripts/news_queue_agent.py` to stage files from bottom to top (oldest first when Finder shows newest first).
 * Queue files are moved into `conteudos/fila-*`, used by `scripts/update_news.py`, then cleaned after successful publish via `conteudos/news-queue-manifest.json`. Do not commit queue files or queue manifests.
+* Daily news older than 30 hours is stale and must be moved to `/Users/tmss1988/Desktop/tech e ouro/_descartadas` instead of being published. Monthly/weekly magazine sources can stay eligible for up to 45 days but must not outrank fresh daily news.
 * Ignore ad/support files such as `add*.jpg`, AdSense/Goggle files, `.DS_Store`, and video helper files.
 
 ### 3. Agente de Publicidade & Contas

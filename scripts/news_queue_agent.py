@@ -9,9 +9,21 @@ from pathlib import Path
 
 DEFAULT_SOURCE_DIR = Path("/Users/tmss1988/Desktop/tech e ouro")
 DEFAULT_CONTENT_DIR = Path("conteudos")
+DISCARDED_DIR_NAME = "_descartadas"
 MANIFEST_NAME = "news-queue-manifest.json"
 SUPPORTED_SUFFIXES = {".txt", ".rtf", ".pdf", ".png", ".jpg", ".jpeg", ".webp"}
 IGNORED_NAMES = {".ds_store"}
+MONTHLY_SOURCE_HINTS = {
+    "deco",
+    "expresso weekly",
+    "lux",
+    "lux woman",
+    "national geografich",
+    "nova gente",
+    "pc guia",
+    "sabado",
+    "visao",
+}
 
 
 def should_ignore(path):
@@ -19,20 +31,63 @@ def should_ignore(path):
     stem = path.stem.lower().strip()
     if name in IGNORED_NAMES or name.startswith("."):
         return True
+    if any(part.startswith(".") or part == DISCARDED_DIR_NAME for part in path.parts):
+        return True
     if "adsense" in name or "goggle" in name or stem.startswith("add") or "video" in stem:
         return True
     return path.suffix.lower() not in SUPPORTED_SUFFIXES
 
 
-def sorted_sources(source_dir, order):
-    files = [p for p in source_dir.iterdir() if p.is_file() and not should_ignore(p)]
+def source_label(source_dir, path):
+    try:
+        relative = path.relative_to(source_dir)
+    except ValueError:
+        return path.stem
+    if len(relative.parts) > 1:
+        return Path(relative.parts[0]).stem
+    return path.stem
+
+
+def is_monthly_source(source_dir, path):
+    label = source_label(source_dir, path).lower()
+    return any(hint in label for hint in MONTHLY_SOURCE_HINTS)
+
+
+def max_age_for(source_dir, path, daily_hours, monthly_days):
+    if is_monthly_source(source_dir, path):
+        return monthly_days * 24 * 60 * 60
+    return daily_hours * 60 * 60
+
+
+def partition_fresh_and_stale(source_dir, files, daily_hours, monthly_days):
+    now = datetime.now().timestamp()
+    fresh = []
+    stale = []
+    for path in files:
+        age_seconds = now - path.stat().st_mtime
+        if age_seconds > max_age_for(source_dir, path, daily_hours, monthly_days):
+            stale.append(path)
+        else:
+            fresh.append(path)
+    return fresh, stale
+
+
+def all_source_files(source_dir):
+    return [p for p in source_dir.rglob("*") if p.is_file() and not should_ignore(p)]
+
+
+def sorted_sources(source_dir, order, max_age_hours=30, monthly_max_age_days=45, include_stale=False):
+    files = all_source_files(source_dir)
+    fresh, stale = partition_fresh_and_stale(source_dir, files, max_age_hours, monthly_max_age_days)
+    files = files if include_stale else fresh
+    monthly_priority = lambda p: 1 if is_monthly_source(source_dir, p) else 0
     if order == "oldest-first":
-        return sorted(files, key=lambda p: (p.stat().st_mtime, p.name.lower()))
+        return sorted(files, key=lambda p: (monthly_priority(p), p.stat().st_mtime, p.name.lower()))
     if order == "newest-first":
-        return sorted(files, key=lambda p: (p.stat().st_mtime, p.name.lower()), reverse=True)
+        return sorted(files, key=lambda p: (monthly_priority(p), -p.stat().st_mtime, p.name.lower()))
     if order == "name-desc":
-        return sorted(files, key=lambda p: p.name.lower(), reverse=True)
-    return sorted(files, key=lambda p: p.name.lower())
+        return sorted(files, key=lambda p: (monthly_priority(p), p.name.lower()), reverse=True)
+    return sorted(files, key=lambda p: (monthly_priority(p), p.name.lower()))
 
 
 def slugify(value):
@@ -54,6 +109,22 @@ def unique_destination(content_dir, source_path, position):
         candidate = content_dir / f"fila-{timestamp}-{position:03d}-{base}-{counter}{suffix}"
         counter += 1
     return candidate
+
+
+def unique_discard_destination(source_dir, source_path):
+    date_part = datetime.now().strftime("%Y-%m-%d")
+    try:
+        relative = source_path.relative_to(source_dir)
+    except ValueError:
+        relative = Path(source_path.name)
+    destination = source_dir / DISCARDED_DIR_NAME / date_part / relative
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    counter = 2
+    final = destination
+    while final.exists():
+        final = destination.with_name(f"{destination.stem}-{counter}{destination.suffix}")
+        counter += 1
+    return final
 
 
 def load_manifest(content_dir):
@@ -96,12 +167,24 @@ def stage_file(source_path, destination):
     shutil.move(str(source_path), str(destination))
 
 
-def stage_queue(source_dir, content_dir, limit, order):
+def discard_stale_sources(source_dir, max_age_hours, monthly_max_age_days):
+    files = all_source_files(source_dir)
+    _, stale = partition_fresh_and_stale(source_dir, files, max_age_hours, monthly_max_age_days)
+    discarded = []
+    for source_path in stale:
+        destination = unique_discard_destination(source_dir, source_path)
+        shutil.move(str(source_path), str(destination))
+        discarded.append((source_path, destination))
+    return discarded
+
+
+def stage_queue(source_dir, content_dir, limit, order, max_age_hours, monthly_max_age_days):
     if not source_dir.exists():
         raise FileNotFoundError(f"Pasta de notícias não encontrada: {source_dir}")
     content_dir.mkdir(parents=True, exist_ok=True)
 
-    sources = sorted_sources(source_dir, order)[:limit]
+    discarded = discard_stale_sources(source_dir, max_age_hours, monthly_max_age_days)
+    sources = sorted_sources(source_dir, order, max_age_hours, monthly_max_age_days)[:limit]
     manifest = load_manifest(content_dir)
     queued_at = datetime.now().isoformat(timespec="seconds")
     staged = []
@@ -113,6 +196,7 @@ def stage_queue(source_dir, content_dir, limit, order):
             "source_path": str(source_path),
             "staged_path": str(destination),
             "staged_name": destination.name,
+            "source_label": source_label(source_dir, source_path),
             "queued_at": queued_at,
             "order": order,
             "status": "staged",
@@ -121,7 +205,7 @@ def stage_queue(source_dir, content_dir, limit, order):
         staged.append(entry)
 
     save_manifest(content_dir, manifest)
-    return staged
+    return staged, discarded
 
 
 def main():
@@ -129,6 +213,8 @@ def main():
     parser.add_argument("--source-dir", default=str(DEFAULT_SOURCE_DIR))
     parser.add_argument("--content-dir", default=str(DEFAULT_CONTENT_DIR))
     parser.add_argument("--limit", type=int, default=20)
+    parser.add_argument("--max-age-hours", type=int, default=30)
+    parser.add_argument("--monthly-max-age-days", type=int, default=45)
     parser.add_argument(
         "--order",
         choices=("oldest-first", "newest-first", "name-asc", "name-desc"),
@@ -140,15 +226,33 @@ def main():
 
     source_dir = Path(args.source_dir).expanduser()
     content_dir = Path(args.content_dir)
-    candidates = sorted_sources(source_dir, args.order)[: args.limit] if source_dir.exists() else []
+    all_files = all_source_files(source_dir) if source_dir.exists() else []
+    fresh, stale = partition_fresh_and_stale(
+        source_dir, all_files, args.max_age_hours, args.monthly_max_age_days
+    )
+    candidates = sorted_sources(
+        source_dir, args.order, args.max_age_hours, args.monthly_max_age_days
+    )[: args.limit] if source_dir.exists() else []
 
     if args.dry_run:
         print(f"Queue agent: {len(candidates)} file(s) would be staged from {source_dir}.")
+        if stale:
+            print(f"Queue agent: {len(stale)} stale file(s) would be moved to {DISCARDED_DIR_NAME}.")
+        print(f"Queue agent: {len(fresh)} fresh source file(s), {len(stale)} stale source file(s).")
         for path in candidates:
-            print(f"- {path.name}")
+            print(f"- {source_label(source_dir, path)} / {path.name}")
         return
 
-    staged = stage_queue(source_dir, content_dir, args.limit, args.order)
+    staged, discarded = stage_queue(
+        source_dir,
+        content_dir,
+        args.limit,
+        args.order,
+        args.max_age_hours,
+        args.monthly_max_age_days,
+    )
+    if discarded:
+        print(f"Queue agent: discarded {len(discarded)} stale file(s) to {DISCARDED_DIR_NAME}.")
     if not staged:
         print(f"Queue agent: no news files to stage in {source_dir}.")
         return
