@@ -291,9 +291,6 @@ setInterval(clock,1000);clock();
 })();
 
 // BTC
-document.getElementById('btcP').textContent='$103,840';
-document.getElementById('btcS').innerHTML='7d <span style="color:#00ff8c">+11.2%</span> · ATH $109,588';
-document.getElementById('btc24h').textContent='+2.84%';
 document.getElementById('halv').textContent=Math.floor((new Date('2028-04-20')-new Date())/864e5).toLocaleString('pt-PT')+'d';
 
 function setText(id, value) {
@@ -306,34 +303,45 @@ function setHtml(id, value) {
   if (el) el.innerHTML = value;
 }
 
-function liveNumberToText(value, prefix) {
-  var num = Number(value);
-  if (!Number.isFinite(num)) return 'REF';
-  return (prefix || '') + num.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+var terminalSources = [];
+
+function setTerminalStatus() {
+  var label = document.getElementById('terminalLiveLabel');
+  if (!label) return;
+  label.textContent = terminalSources.length
+    ? 'LIGAÇÃO ATIVA · ' + terminalSources.join(' + ')
+    : 'DADOS DE REFERÊNCIA · A LIGAR';
+}
+
+function markSourceLive(source) {
+  if (terminalSources.indexOf(source) === -1) terminalSources.push(source);
+  setTerminalStatus();
 }
 
 function updateLiveRefs() {
   fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true')
-    .then(function(r){ return r.json(); })
+    .then(function(r){ if (!r.ok) throw new Error('CoinGecko indisponível'); return r.json(); })
     .then(function(d){
       if (d && d.bitcoin) {
         setText('btcP', '$' + Math.round(d.bitcoin.usd).toLocaleString('en-US'));
         var chg = Number(d.bitcoin.usd_24h_change || 0).toFixed(2);
         setHtml('btcS', '24h <span style="color:' + (chg >= 0 ? '#00ff8c' : '#ff4466') + '">' + (chg >= 0 ? '+' : '') + chg + '%</span> · REF COINGECKO');
         setText('btc24h', (chg >= 0 ? '+' : '') + chg + '%');
+        markSourceLive('COINGECKO');
       }
     }).catch(function(){});
 
-  fetch('https://api.frankfurter.app/latest?from=EUR&to=USD')
-    .then(function(r){ return r.json(); })
+  fetch('https://open.er-api.com/v6/latest/EUR')
+    .then(function(r){ if (!r.ok) throw new Error('Câmbio indisponível'); return r.json(); })
     .then(function(d){
       if (d && d.rates && d.rates.USD) {
-        setText('eurUsdPrice', Number(d.rates.USD).toFixed(4));
+        var eurUsd = Number(d.rates.USD).toFixed(4);
+        setText('eurUsdPrice', eurUsd);
+        setText('eurUsdMacro', eurUsd);
+        markSourceLive('CÂMBIO');
       }
     }).catch(function(){});
 }
-
-updateLiveRefs();
 
 // NEWS TICKER
 (function(){
@@ -362,7 +370,7 @@ updateLiveRefs();
     ['DAX','REF','Reuters','pos']
   ];
   function b(){return d.map(function(t){
-    var value = t[0] === 'EUR/USD' ? '<span id="eurUsdPrice">1.1248</span>' : t[1];
+    var value = t[0] === 'EUR/USD' ? '<span id="eurUsdPrice">—</span>' : t[1];
     return '<div class="ti"><span class="tsy">'+t[0]+'</span><span class="tpr">'+value+'</span><span class="'+t[3]+'" style="font-size:10px">'+t[2]+'</span></div>';
   }).join('');}
   document.getElementById('ttrack').innerHTML=b()+b();
@@ -391,7 +399,7 @@ updateLiveRefs();
 // MACRO & FOREX
 (function(){
   var rows=[
-    ['EUR/USD','1.1248','<span class="pos">+0.3%</span>'],
+    ['EUR/USD','<span id="eurUsdMacro">—</span>','<span class="amb">live</span>'],
     ['GBP/USD','1.2934','<span class="pos">+0.2%</span>'],
     ['USD/JPY','143.20','<span class="neg">−0.4%</span>'],
     ['USD/CAD','1.3580','<span class="neg">−0.1%</span>'],
@@ -400,6 +408,9 @@ updateLiveRefs();
   ];
   document.getElementById('macro').innerHTML=rows.map(function(r){return '<div class="lr"><span class="ll">'+r[0]+'</span><span class="lv">'+r[1]+' '+r[2]+'</span></div>';}).join('');
 })();
+
+setTerminalStatus();
+updateLiveRefs();
 
 // COMMODITIES
 (function(){
