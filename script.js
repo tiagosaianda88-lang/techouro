@@ -126,6 +126,20 @@ function safeModalUrl(value) {
   }
 }
 
+function safeExternalStoryUrl(value) {
+  const url = safeModalUrl(value);
+  if (!url) return '';
+
+  try {
+    const parsed = new URL(url);
+    const current = new URL(window.location.href);
+    if (parsed.origin === current.origin) return '';
+    return url;
+  } catch {
+    return '';
+  }
+}
+
 function renderModalParagraphs(value, lang) {
   return value
     ? value.split(/\n+/).map(para => `<p lang="${lang}">${escapeModalHtml(para.trim())}</p>`).join('')
@@ -208,7 +222,7 @@ function openArticle(cardEl) {
   const bodyPt = cardEl.getAttribute('data-body-pt') || '';
   const bodyEn = cardEl.getAttribute('data-body-en') || '';
   const dateText = dateEl ? dateEl.innerText : 'HOJE / TODAY';
-  const safeUrl = safeModalUrl(url);
+  const safeUrl = safeExternalStoryUrl(url);
   const safeSourceUrl = safeModalUrl(sourceUrl);
 
   let modal = document.getElementById('article-modal');

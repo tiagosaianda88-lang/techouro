@@ -540,7 +540,7 @@ class PublisherAgent:
         <span class="editorial-attribution"><span lang="pt">Resumo editorial Tech &amp; Ouro</span><span lang="en">Editorial summary by Tech &amp; Ouro</span></span>
       </div>
       <div style="display: flex; gap: 8px; margin-left: auto;">
-        <a href="{link}" class="read-full-link" data-open-article="true" aria-label="Abrir artigo / Open article">→</a>
+        <a href="#article" class="read-full-link" data-open-article="true" aria-label="Abrir artigo / Open article" data-section-link="{link}">→</a>
       </div>
     </div>
   </div>
